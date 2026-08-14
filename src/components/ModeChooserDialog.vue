@@ -44,11 +44,11 @@ async function pick(mode: 'user' | 'admin') {
       <AppButton class="h-10 w-full justify-start" variant="primary" @click="pick('user')">
         {{ t('mode.user') }}
       </AppButton>
-      <p class="m-0 text-[11px] text-muted">{{ t('mode.userHint') }}</p>
+      <p class="m-0 text-[0.69rem] text-muted">{{ t('mode.userHint') }}</p>
       <AppButton class="mt-1 h-10 w-full justify-start" @click="pick('admin')">
         {{ t('mode.admin') }}
       </AppButton>
-      <p class="m-0 text-[11px] text-muted">{{ t('mode.adminHint') }}</p>
+      <p class="m-0 text-[0.69rem] text-muted">{{ t('mode.adminHint') }}</p>
     </div>
   </AppDialog>
 </template>

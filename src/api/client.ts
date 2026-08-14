@@ -24,6 +24,13 @@ import type {
   SessionResponse,
   AdminBindingsResponse,
   AdminAuditResponse,
+  EncodingStatusResponse,
+  EncodingResolveRequest,
+  EncodingResolveResponse,
+  EncodingStonecuttingOptionsRequest,
+  EncodingStonecuttingOptionsResponse,
+  EncodingEncodeRequest,
+  EncodingEncodeResponse,
 } from '@/types'
 
 export type * from '@/types'
@@ -98,4 +105,15 @@ export const api = {
       method: 'POST',
       data: { cpuName } satisfies CraftCancelRequest,
     }),
+
+  /** /api/v1/encoding/* */
+  encoding: {
+    status: () => request<EncodingStatusResponse>('/api/v1/encoding/status'),
+    resolve: (body: EncodingResolveRequest) =>
+      request<EncodingResolveResponse>('/api/v1/encoding/resolve', { method: 'POST', data: body }),
+    stonecuttingOptions: (body: EncodingStonecuttingOptionsRequest) =>
+      request<EncodingStonecuttingOptionsResponse>('/api/v1/encoding/stonecutting/options', { method: 'POST', data: body }),
+    encode: (body: EncodingEncodeRequest) =>
+      request<EncodingEncodeResponse>('/api/v1/encoding/encode', { method: 'POST', data: body }),
+  },
 }

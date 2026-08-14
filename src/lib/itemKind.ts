@@ -55,16 +55,11 @@ export function isItemKindId(value: string): value is ItemKindId {
 }
 
 /**
- * 归一化条目类型：优先 kind；兼容旧 isFluid / key 前缀；未知字符串 → other。
+ * 归一化条目类型：读 kind；未知或缺省 → other。
  */
-export function resolveItemKind(item: { kind?: string | null; isFluid?: boolean; key?: string }): ItemKindId {
+export function resolveItemKind(item: { kind?: string | null }): ItemKindId {
   const raw = (item.kind || '').trim().toLowerCase()
   if (isItemKindId(raw)) return raw
-  if (raw) return 'other'
-  if (item.isFluid) return 'fluid'
-  const key = item.key || ''
-  if (key.startsWith('fluid:')) return 'fluid'
-  if (key.startsWith('item:')) return 'item'
   return 'other'
 }
 

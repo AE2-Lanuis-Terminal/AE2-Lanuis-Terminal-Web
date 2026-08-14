@@ -238,7 +238,7 @@ const pageBtnActiveClass =
     </div>
 
     <span
-      class="mono inline-flex h-8 shrink-0 items-center rounded-[var(--app-radius-md)] border border-[color:var(--glass-border)] bg-[var(--glass-bg-soft)] px-2.5 text-[12px] text-muted shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-[10px]"
+      class="mono inline-flex h-8 shrink-0 items-center rounded-[var(--app-radius-md)] border border-[color:var(--glass-border)] bg-[var(--glass-bg-soft)] px-2.5 text-[0.75rem] text-muted shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-[10px]"
     >
       {{ rangeLabel }}
     </span>

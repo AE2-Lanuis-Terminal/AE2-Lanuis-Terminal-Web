@@ -94,8 +94,6 @@ export interface PatternMoveRequest {
 
 /** GET /api/v1/patterns 查询 */
 export interface PatternsQuery extends PageQuery {
-  /** 兼容：匹配产出或输入（OR） */
-  q?: string
   /** 只匹配产出（primaryOutput / outputs / definition） */
   qOutput?: string
   /** 只匹配输入（inputs + alternatives）；与 qOutput 同时存在时 AND */

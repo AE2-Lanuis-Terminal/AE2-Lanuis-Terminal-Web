@@ -47,7 +47,7 @@ const isNumber = computed(() => props.type === 'number')
       :disabled="disabled"
       :autocomplete="autocomplete"
       :aria-label="ariaLabel"
-      :class="cn(affixInnerClass(cn('w-full', mono ? 'mono' : undefined, isNumber && 'ui-no-spin')), compact ? 'h-8 text-[13px]' : undefined)"
+      :class="cn(affixInnerClass(cn('w-full', mono ? 'mono' : undefined, isNumber && 'ui-no-spin')), compact ? 'h-8 text-[0.81rem]' : undefined)"
       @update:model-value="$emit('update:modelValue', $event)"
     />
     <template v-if="$slots.affix" #affix>

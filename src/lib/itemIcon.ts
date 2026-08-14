@@ -2,6 +2,7 @@
  * 物品图标 URL：拼 API 基址；缺省按 id 回退 `/api/v1/icons/...`。
  */
 import { resolveBaseUrl } from '@/lib/runtime'
+import { resolveItemKind } from '@/lib/itemKind'
 import type { Item } from '@/types'
 
 /** 16×16 缺失材质棋盘（紫/黑），替代 1×1 色点放大 */
@@ -19,14 +20,14 @@ export const ITEM_ICON_PLACEHOLDER =
 /**
  * 解析物品/流体图标绝对地址（相对 iconUrl 或按 id 拼 API）。
  */
-export function resolveItemIconUrl(item: Pick<Item, 'id' | 'iconUrl' | 'isFluid'>, baseUrl?: string): string {
+export function resolveItemIconUrl(item: Pick<Item, 'id' | 'iconUrl' | 'kind'>, baseUrl?: string): string {
   const id = (item.id || '').trim()
   const icon = (item.iconUrl || '').trim()
   if (!icon) {
     if (id.includes(':')) {
       const [ns, ...rest] = id.split(':')
       const path = rest.join(':')
-      const kind = item.isFluid ? 'fluid' : 'item'
+      const kind = resolveItemKind(item) === 'fluid' ? 'fluid' : 'item'
       return joinApi(`/api/v1/icons/${kind}/${ns}/${path}`, baseUrl)
     }
     return ITEM_ICON_PLACEHOLDER

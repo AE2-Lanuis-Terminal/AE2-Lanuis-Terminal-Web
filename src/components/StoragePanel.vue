@@ -103,7 +103,7 @@ const showExact = computed(() => {
   if (!selected.value) return false
   const display = formatStackAmount(selected.value)
   const raw = selected.value.amount || '0'
-  if (selected.value.isFluid || resolveItemKind(selected.value) === 'fluid') {
+  if (resolveItemKind(selected.value) === 'fluid') {
     return display !== `${raw} mB`
   }
   return display !== raw
@@ -157,10 +157,10 @@ function itemChipClass(item: Item) {
   }
   const kindId = resolveItemKind(item)
   return cn(
-    'ui-glass-chip ui-hover-room text-left',
+    'ui-glass-chip text-left',
     compact.value
       ? 'relative inline-flex size-[3.25rem] items-center justify-center overflow-hidden rounded-[8px] p-0'
-      : 'grid min-h-[76px] min-w-[140px] gap-0.5 rounded-[8px] p-2.5',
+      : 'grid min-h-[4.75rem] min-w-[8.75rem] gap-0.5 rounded-[8px] p-2.5',
     ITEM_KIND_META[kindId].chipMod,
     item.craftable && 'ui-item-chip--craftable',
     !stocked && 'ui-item-chip--empty',
@@ -169,7 +169,7 @@ function itemChipClass(item: Item) {
 }
 
 function gridClass() {
-  return compact.value ? 'grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-1.5' : 'grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-1.5'
+  return compact.value ? 'grid grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))] gap-1.5' : 'grid grid-cols-[repeat(auto-fill,minmax(8.75rem,1fr))] gap-1.5'
 }
 
 function applySubscribe() {
@@ -316,7 +316,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="flex h-full min-h-[240px] min-w-[280px] flex-col overflow-hidden">
+  <section class="flex h-full min-h-[15rem] min-w-[17.5rem] flex-col overflow-hidden">
     <div class="mb-3 flex shrink-0 flex-wrap items-center gap-2">
       <AppInput v-model="q" compact mono class="min-w-[11rem] flex-1 basis-[11rem]" :placeholder="t('storage.search')">
         <template #affix>
@@ -350,7 +350,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <p v-if="error" class="mb-2 shrink-0 text-[13px] text-red">{{ error }}</p>
+    <p v-if="error" class="mb-2 shrink-0 text-[0.81rem] text-red">{{ error }}</p>
 
     <div class="relative min-h-0 flex-1" :aria-busy="loading || undefined">
       <div v-if="loading" class="ui-loading-bar" role="status" :aria-label="t('common.loading')" />
@@ -371,10 +371,10 @@ onUnmounted(() => {
                         <ItemIcon :item="item" />
                       </span>
                       <div class="min-w-0 flex-1 grid gap-0.5">
-                        <strong class="truncate text-[12.5px] font-medium tracking-[-0.01em]">
+                        <strong class="truncate text-[0.78rem] font-medium tracking-[-0.01em]">
                           <McFormattedText :text="item.displayName" />
                         </strong>
-                        <span class="mono text-[11px] font-bold text-ink">{{ formatStackAmount(item) }}</span>
+                        <span class="mono text-[0.69rem] font-bold text-ink">{{ formatStackAmount(item) }}</span>
                         <ItemMetaTags :item="item" crafting />
                       </div>
                     </div>
@@ -386,7 +386,7 @@ onUnmounted(() => {
                   :side-offset="6"
                   class="!max-w-[14rem] !border !border-line !bg-[var(--glass-bg-strong)] !px-2.5 !py-1.5 !text-ink shadow-[var(--glass-shadow)] [&_svg]:!bg-[var(--glass-bg-strong)] [&_svg]:!fill-[var(--glass-bg-strong)]"
                 >
-                  <span class="block max-w-full truncate text-[12px] font-medium">
+                  <span class="block max-w-full truncate text-[0.75rem] font-medium">
                     <McFormattedText :text="item.displayName" />
                   </span>
                 </TooltipContent>
@@ -405,10 +405,10 @@ onUnmounted(() => {
                         <ItemIcon :item="item" />
                       </span>
                       <div class="min-w-0 flex-1 grid gap-0.5">
-                        <strong class="truncate text-[12.5px] font-medium tracking-[-0.01em]">
+                        <strong class="truncate text-[0.78rem] font-medium tracking-[-0.01em]">
                           <McFormattedText :text="item.displayName" />
                         </strong>
-                        <span class="mono text-[11px] font-bold text-ink">{{ formatStackAmount(item) }}</span>
+                        <span class="mono text-[0.69rem] font-bold text-ink">{{ formatStackAmount(item) }}</span>
                         <ItemMetaTags :item="item" />
                       </div>
                     </div>
@@ -420,7 +420,7 @@ onUnmounted(() => {
                   :side-offset="6"
                   class="!max-w-[14rem] !border !border-line !bg-[var(--glass-bg-strong)] !px-2.5 !py-1.5 !text-ink shadow-[var(--glass-shadow)] [&_svg]:!bg-[var(--glass-bg-strong)] [&_svg]:!fill-[var(--glass-bg-strong)]"
                 >
-                  <span class="block max-w-full truncate text-[12px] font-medium">
+                  <span class="block max-w-full truncate text-[0.75rem] font-medium">
                     <McFormattedText :text="item.displayName" />
                   </span>
                 </TooltipContent>
@@ -440,21 +440,21 @@ onUnmounted(() => {
             <ItemIcon :item="selected" />
           </span>
           <div class="min-w-0">
-            <h2 class="m-0 text-[13px] font-semibold tracking-[-0.02em]">
+            <h2 class="m-0 text-[0.81rem] font-semibold tracking-[-0.02em]">
               <McFormattedText v-if="selected" :text="selected.displayName" />
               <template v-else>{{ t('storage.detail') }}</template>
             </h2>
-            <p v-if="selected" class="mono m-0 mt-0.5 truncate text-[11px] text-muted">{{ selected.id }}</p>
+            <p v-if="selected" class="mono m-0 mt-0.5 truncate text-[0.69rem] text-muted">{{ selected.id }}</p>
           </div>
         </div>
       </template>
 
       <template v-if="selected">
-        <p class="m-0 text-[13px]">
+        <p class="m-0 text-[0.81rem]">
           {{ t('storage.amount') }}
           <strong class="mono font-bold text-ink">{{ formatStackAmount(selected) }}</strong>
         </p>
-        <p v-if="showExact" class="m-0 text-[12px] text-muted">
+        <p v-if="showExact" class="m-0 text-[0.75rem] text-muted">
           {{ t('storage.amountExact') }}
           <span class="mono">{{ formatExactAmount(selected) }}</span>
         </p>
@@ -469,7 +469,7 @@ onUnmounted(() => {
                 v-for="n in AMOUNT_PRESETS"
                 :key="n"
                 type="button"
-                class="ui-btn mono !h-7 !min-w-9 !px-2 text-[11px]"
+                class="ui-btn mono !h-7 !min-w-9 !px-2 text-[0.69rem]"
                 :class="craftAmount === String(n) ? '!border-cyan/55 !text-cyan' : ''"
                 @click="applyPreset(n)"
               >
@@ -480,7 +480,7 @@ onUnmounted(() => {
           <AppButton type="button" variant="primary" size="sm" class="w-full" :disabled="craftBusy" @click="previewPlan">
             {{ t('craft.previewPlan') }}
           </AppButton>
-          <p class="m-0 flex items-start gap-1 text-[11px] leading-snug text-muted">
+          <p class="m-0 flex items-start gap-1 text-[0.69rem] leading-snug text-muted">
             <CircleHelp class="mt-0.5 size-3.5 shrink-0 opacity-70" aria-hidden="true" />
             <span>{{ t('craft.previewPlanHint') }}</span>
           </p>

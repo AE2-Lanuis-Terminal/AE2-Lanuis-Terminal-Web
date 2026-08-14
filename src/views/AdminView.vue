@@ -146,8 +146,8 @@ watch(section, (s) => {
   <div class="admin-shell flex h-dvh min-h-0 flex-col bg-[#0e1218] text-[#e8eef7]">
     <header class="app-safe-header flex shrink-0 items-center gap-3 border-b border-white/10 bg-[#121821] px-4 pb-2.5" :class="chrome ? 'select-none' : ''">
       <div class="min-w-0 flex-1">
-        <p class="m-0 text-[11px] uppercase tracking-[0.14em] text-[#7d8fa8]">{{ t('adminShell.badge') }}</p>
-        <h1 class="m-0 truncate text-[15px] font-semibold tracking-[-0.02em]">{{ t('adminShell.title') }}</h1>
+        <p class="m-0 text-[0.69rem] uppercase tracking-[0.14em] text-[#7d8fa8]">{{ t('adminShell.badge') }}</p>
+        <h1 class="m-0 truncate text-[0.94rem] font-semibold tracking-[-0.02em]">{{ t('adminShell.title') }}</h1>
       </div>
       <p class="m-0 hidden text-xs text-[#7d8fa8] sm:block">{{ account }}</p>
       <AppButton class="!h-8" @click="goUserShell">{{ t('adminShell.toUser') }}</AppButton>
@@ -161,16 +161,16 @@ watch(section, (s) => {
     <nav class="flex shrink-0 gap-1 border-b border-white/10 bg-[#10151d] px-4 py-2">
       <button
         type="button"
-        class="rounded px-3 py-1.5 text-[13px] transition-colors"
+        class="rounded px-3 py-1.5 text-[0.81rem] transition-colors"
         :class="section === 'networks' ? 'bg-white/10 text-white' : 'text-[#7d8fa8] hover:bg-white/5'"
         @click="section = 'networks'"
       >
         {{ t('adminShell.networks') }}
-        <span class="ml-1 text-[11px] opacity-70">{{ onlineCount }}/{{ bindings.length }}</span>
+        <span class="ml-1 text-[0.69rem] opacity-70">{{ onlineCount }}/{{ bindings.length }}</span>
       </button>
       <button
         type="button"
-        class="rounded px-3 py-1.5 text-[13px] transition-colors"
+        class="rounded px-3 py-1.5 text-[0.81rem] transition-colors"
         :class="section === 'logs' ? 'bg-white/10 text-white' : 'text-[#7d8fa8] hover:bg-white/5'"
         @click="section = 'logs'"
       >
@@ -192,19 +192,19 @@ watch(section, (s) => {
             <article v-for="row in bindings" :key="row.playerUuid" class="rounded-lg border border-white/10 bg-[#151b24] p-3.5">
               <div class="flex flex-wrap items-start justify-between gap-2">
                 <div class="min-w-0">
-                  <strong class="block truncate text-[14px]">{{ row.playerName || '—' }}</strong>
-                  <p class="mono m-0 mt-0.5 truncate text-[11px] text-[#7d8fa8]">{{ row.playerUuid }}</p>
+                  <strong class="block truncate text-[0.88rem]">{{ row.playerName || '—' }}</strong>
+                  <p class="mono m-0 mt-0.5 truncate text-[0.69rem] text-[#7d8fa8]">{{ row.playerUuid }}</p>
                 </div>
                 <div class="flex flex-wrap gap-1">
-                  <span class="rounded px-1.5 py-0.5 text-[11px]" :class="row.playerOnline ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/5 text-[#7d8fa8]'">
+                  <span class="rounded px-1.5 py-0.5 text-[0.69rem]" :class="row.playerOnline ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/5 text-[#7d8fa8]'">
                     {{ t('admin.playerOnline') }} {{ yn(row.playerOnline) }}
                   </span>
-                  <span class="rounded px-1.5 py-0.5 text-[11px]" :class="row.networkOnline ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/5 text-[#7d8fa8]'">
+                  <span class="rounded px-1.5 py-0.5 text-[0.69rem]" :class="row.networkOnline ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/5 text-[#7d8fa8]'">
                     {{ t('admin.networkOnline') }} {{ yn(row.networkOnline) }}
                   </span>
                 </div>
               </div>
-              <dl class="mt-2 grid gap-1 text-[12px] text-[#b7c4d6]">
+              <dl class="mt-2 grid gap-1 text-[0.75rem] text-[#b7c4d6]">
                 <div class="flex gap-2">
                   <dt class="text-[#7d8fa8]">{{ t('admin.terminal') }}</dt>
                   <dd class="mono m-0 truncate">{{ row.endpoint?.terminalItemId || '—' }}</dd>
@@ -244,7 +244,7 @@ watch(section, (s) => {
         <p class="mb-2 min-h-4 shrink-0 text-xs" :class="logErr ? 'text-red-400' : 'text-[#7d8fa8]'">{{ logMsg }}</p>
         <ScrollFade class="min-h-0 flex-1 overflow-auto">
           <p v-if="!logs.length && !logBusy" class="text-[#7d8fa8]">{{ t('adminLogs.empty') }}</p>
-          <table v-else class="w-full min-w-[640px] border-collapse text-left text-[12.5px]">
+          <table v-else class="w-full min-w-[40rem] border-collapse text-left text-[0.78rem]">
             <thead class="sticky top-0 bg-[#121821] text-[#7d8fa8]">
               <tr>
                 <th class="border-b border-white/10 px-2 py-2 font-medium">{{ t('adminLogs.time') }}</th>
@@ -260,7 +260,7 @@ watch(section, (s) => {
                 <td class="mono px-2 py-2">{{ e.action }}</td>
                 <td class="px-2 py-2">{{ e.actorName || e.actorUuid || '—' }}</td>
                 <td class="px-2 py-2">{{ e.targetName || e.targetUuid || '—' }}</td>
-                <td class="max-w-[240px] truncate px-2 py-2 text-[#9aabc2]">{{ e.detail || '—' }}</td>
+                <td class="max-w-[15rem] truncate px-2 py-2 text-[#9aabc2]">{{ e.detail || '—' }}</td>
               </tr>
             </tbody>
           </table>

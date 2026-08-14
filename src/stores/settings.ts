@@ -1,8 +1,9 @@
 /**
- * 主题、字体、动画、关闭行为、语言的单一数据源。
+ * 主题、字体、动画、关闭行为、语言、界面缩放的单一数据源。
  * 写入 localStorage，并同步 documentElement dataset 驱动 CSS。
  * 桌面端 emit settings-changed，供设置窗与主窗互相同步。
  * 关闭行为 ask/tray/exit 仅桌面托盘场景有意义。
+ * 界面缩放 1–4：html font-size = N×100%（与 rem 布局联动）。
  */
 
 import { acceptHMRUpdate, defineStore } from 'pinia'
@@ -15,6 +16,8 @@ export type ColorScheme = 'dark' | 'light' | 'system'
 export type { FontPreset, LocalePreference }
 /** 关闭按钮：询问 / 最小化到托盘 / 直接退出 */
 export type CloseBehavior = 'ask' | 'tray' | 'exit'
+/** 界面缩放档位（1×–4×，作用于根字号） */
+export type UiScale = 1 | 2 | 3 | 4
 
 const KEYS = {
   scheme: 'ae2lanuis.colorScheme',
@@ -22,6 +25,7 @@ const KEYS = {
   locale: 'ae2lanuis.locale',
   closeBehavior: 'ae2lanuis.closeBehavior',
   animations: 'ae2lanuis.animations',
+  uiScale: 'ae2lanuis.uiScale',
 } as const
 
 const SETTINGS_CHANGED = 'settings-changed'
@@ -50,6 +54,12 @@ function readAnimationsEnabled(): boolean {
   return true
 }
 
+function readUiScale(): UiScale {
+  const n = Number(localStorage.getItem(KEYS.uiScale))
+  if (n === 1 || n === 2 || n === 3 || n === 4) return n
+  return 1
+}
+
 function resolveDark(scheme: ColorScheme): boolean {
   if (scheme === 'dark') return true
   if (scheme === 'light') return false
@@ -71,6 +81,10 @@ function applyAnimations(enabled: boolean) {
   document.documentElement.dataset.motion = enabled ? 'on' : 'off'
 }
 
+function applyUiScale(scale: UiScale) {
+  document.documentElement.dataset.uiScale = String(scale)
+}
+
 async function broadcastSettingsChanged() {
   if (!isTauri()) return
   try {
@@ -86,6 +100,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const fontPreset = ref<FontPreset>(readFont())
   const closeBehavior = ref<CloseBehavior>(readCloseBehavior())
   const animationsEnabled = ref(readAnimationsEnabled())
+  const uiScale = ref<UiScale>(readUiScale())
   /** 语言偏好（含跟随系统）；实际文案语言由 i18n resolve */
   const locale = ref<LocalePreference>(readLocalePreference())
   const closeConfirmOpen = ref(false)
@@ -98,11 +113,13 @@ export const useSettingsStore = defineStore('settings', () => {
     fontPreset.value = readFont()
     closeBehavior.value = readCloseBehavior()
     animationsEnabled.value = readAnimationsEnabled()
+    uiScale.value = readUiScale()
     locale.value = readLocalePreference()
     applyTheme(colorScheme.value)
     applyFont(fontPreset.value)
     void ensureFontLoaded(fontPreset.value)
     applyAnimations(animationsEnabled.value)
+    applyUiScale(uiScale.value)
     applyResolvedLocale(locale.value)
   }
 
@@ -131,6 +148,13 @@ export const useSettingsStore = defineStore('settings', () => {
     animationsEnabled.value = enabled
     localStorage.setItem(KEYS.animations, enabled ? '1' : '0')
     applyAnimations(enabled)
+    void broadcastSettingsChanged()
+  }
+
+  function setUiScale(scale: UiScale) {
+    uiScale.value = scale
+    localStorage.setItem(KEYS.uiScale, String(scale))
+    applyUiScale(scale)
     void broadcastSettingsChanged()
   }
 
@@ -174,6 +198,7 @@ export const useSettingsStore = defineStore('settings', () => {
     fontPreset,
     closeBehavior,
     animationsEnabled,
+    uiScale,
     locale,
     closeConfirmOpen,
     settingsOpen,
@@ -182,6 +207,7 @@ export const useSettingsStore = defineStore('settings', () => {
     setFontPreset,
     setCloseBehavior,
     setAnimationsEnabled,
+    setUiScale,
     setUiLocale,
     openCloseConfirm,
     closeCloseConfirm,

@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 
 const props = withDefaults(
   defineProps<{
-    item: Pick<Item, 'id' | 'iconUrl' | 'displayName' | 'isFluid'>
+    item: Pick<Item, 'id' | 'iconUrl' | 'displayName' | 'kind'>
     /** 贴边填满格子时去掉圆角 */
     flush?: boolean
   }>(),
@@ -25,7 +25,7 @@ const showPlaceholder = computed(() => failed.value || isItemIconPlaceholder(src
 const label = computed(() => stripMcFormat(props.item.displayName) || props.item.id)
 
 watch(
-  () => [props.item.id, props.item.iconUrl, props.item.isFluid] as const,
+  () => [props.item.id, props.item.iconUrl, props.item.kind] as const,
   () => {
     failed.value = false
     src.value = resolveItemIconUrl(props.item)

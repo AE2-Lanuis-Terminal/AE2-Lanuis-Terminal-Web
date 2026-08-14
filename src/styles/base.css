@@ -10,7 +10,8 @@
 
 /*
  * 全局样式：Fluix 设计 token、shadcn 变量映射、ME 表面与原子 UI 类。
- * 主题由 settings store 写入 html[data-theme] / data-app-font / data-motion。
+ * 主题由 settings store 写入 html[data-theme] / data-app-font / data-motion / data-ui-scale。
+ * 布局与字号优先 rem（最多两位小数）；border / radius / blur / 细线阴影可保留 px。
  * Web 与桌面共用；勿在业务组件硬编码色值，优先用 token。
  */
 
@@ -22,9 +23,11 @@
 /* 字体由 src/lib/fonts.ts 按预设按需加载，勿在此全量 @import / @font-face */
 /* 注册 Tailwind dark 变体 */
 @custom-variant dark (&:is(.dark *));
-/* Reka / shadcn：data-open|closed 对应 data-state，否则弹层动画类不会命中 */
+/* Reka / shadcn：data-open|closed|checked|unchecked 对应 data-state，否则状态类不会命中 */
 @custom-variant data-open (&:where([data-state='open'], [data-open]:not([data-open='false'])));
 @custom-variant data-closed (&:where([data-state='closed'], [data-closed]:not([data-closed='false'])));
+@custom-variant data-checked (&:where([data-state='checked'], [data-checked]:not([data-checked='false'])));
+@custom-variant data-unchecked (&:where([data-state='unchecked'], [data-unchecked]:not([data-unchecked='false'])));
 /* 声明设计 token / 主题扩展 */
 @theme {
   /* CSS 变量 --color-void */
@@ -64,10 +67,10 @@
 /* 默认（暗色）CSS 变量与 shadcn token 映射 */
 :root {
   /* 系统栏安全区：桌面为 0；Android WebView 常返回 0，用下限兜底 */
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-top: env(safe-area-inset-top, 0rem);
+  --safe-right: env(safe-area-inset-right, 0rem);
+  --safe-bottom: env(safe-area-inset-bottom, 0rem);
+  --safe-left: env(safe-area-inset-left, 0rem);
   /* CSS 变量 --app-radius-sm */
   --app-radius-sm: 5px;
   /* CSS 变量 --app-radius-md */
@@ -94,14 +97,14 @@
   --glass-shadow: 0 14px 40px color-mix(in srgb, #000000 48%, transparent), 0 4px 12px color-mix(in srgb, #000000 28%, transparent);
   --glass-shadow-sm: 0 6px 18px color-mix(in srgb, #000000 34%, transparent), 0 2px 4px color-mix(in srgb, #000000 22%, transparent);
   --glass-hover-bg: color-mix(in srgb, var(--color-panel) 68%, transparent);
-  /* 默认 0：滚动裁切区内位移会顶出视野；有边距的容器可覆写 */
+  /* 默认 0：滚动裁切区内位移会顶出视野；有边距的容器可覆写（细位移保持 px） */
   --glass-hover-shift: 0px;
-  --glass-hover-lift: 0 6px 16px color-mix(in srgb, #000000 28%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-cyan) 18%, transparent);
-  --glass-hover-glow: 0 0 14px color-mix(in srgb, var(--color-cyan) 12%, transparent);
+  --glass-hover-lift: 0 0.38rem 1rem color-mix(in srgb, #000000 28%, transparent), 0 0 0 0.06rem color-mix(in srgb, var(--color-cyan) 18%, transparent);
+  --glass-hover-glow: 0 0 0.88rem color-mix(in srgb, var(--color-cyan) 12%, transparent);
   --glass-edge-dark: color-mix(in srgb, #000000 42%, transparent);
   --glass-edge-light: color-mix(in srgb, #ffffff 16%, transparent);
   /* 原生滚动条：随主题 token 切换 */
-  --scrollbar-size: 10px;
+  --scrollbar-size: 0.63rem;
   --scrollbar-track: color-mix(in srgb, var(--color-slot) 40%, transparent);
   --scrollbar-thumb: color-mix(in srgb, var(--color-line-bright) 55%, var(--color-cyan-dim));
   --scrollbar-thumb-hover: color-mix(in srgb, var(--color-cyan-dim) 58%, var(--color-line-bright));
@@ -211,8 +214,8 @@ html[data-theme='light'] {
   --glass-edge-light: color-mix(in srgb, #ffffff 70%, transparent);
   --glass-hover-bg: #ffffff;
   --glass-hover-shift: 0px;
-  --glass-hover-lift: 0 4px 14px color-mix(in srgb, #121826 12%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-cyan) 22%, transparent);
-  --glass-hover-glow: 0 0 10px color-mix(in srgb, var(--color-cyan) 10%, transparent);
+  --glass-hover-lift: 0 0.25rem 0.88rem color-mix(in srgb, #121826 12%, transparent), 0 0 0 0.06rem color-mix(in srgb, var(--color-cyan) 22%, transparent);
+  --glass-hover-glow: 0 0 0.63rem color-mix(in srgb, var(--color-cyan) 10%, transparent);
 }
 
 /* 按 data-theme 切换 Fluix 色板 */
@@ -221,13 +224,13 @@ html[data-theme='light'] .me-surface {
   background-image:
     radial-gradient(ellipse 90% 55% at 50% -8%, color-mix(in srgb, #0a7fa8 12%, transparent), transparent 58%),
     radial-gradient(ellipse 50% 40% at 100% 100%, color-mix(in srgb, #0f82a6 7%, transparent), transparent 55%),
-    linear-gradient(to right, color-mix(in srgb, #aeb9cb 50%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, #aeb9cb 50%, transparent) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, #aeb9cb 50%, transparent) 0.06rem, transparent 0.06rem),
+    linear-gradient(to bottom, color-mix(in srgb, #aeb9cb 50%, transparent) 0.06rem, transparent 0.06rem);
   background-size:
     auto,
     auto,
-    18px 18px,
-    18px 18px;
+    1.13rem 1.13rem,
+    1.13rem 1.13rem;
 }
 
 /* 浅色：状态边框略提饱和 + 极淡底色，便于扫视区分，不过分抢戏 */
@@ -307,10 +310,27 @@ html[data-app-font='system'] {
 
 /* 安全区：置于 @layer 外，避免被 Tailwind 工具类盖住 */
 html[data-platform='android'] {
-  --safe-top: max(env(safe-area-inset-top, 0px), 28px);
-  --safe-right: max(env(safe-area-inset-right, 0px), 0px);
-  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
-  --safe-left: max(env(safe-area-inset-left, 0px), 0px);
+  --safe-top: max(env(safe-area-inset-top, 0rem), 1.75rem);
+  --safe-right: max(env(safe-area-inset-right, 0rem), 0rem);
+  --safe-bottom: max(env(safe-area-inset-bottom, 0rem), 1rem);
+  --safe-left: max(env(safe-area-inset-left, 0rem), 0rem);
+}
+
+/* 界面缩放 1×–4×：放大根字号，全站 rem / Tailwind spacing 联动 */
+html {
+  font-size: 100%;
+}
+html[data-ui-scale='1'] {
+  font-size: 100%;
+}
+html[data-ui-scale='2'] {
+  font-size: 200%;
+}
+html[data-ui-scale='3'] {
+  font-size: 300%;
+}
+html[data-ui-scale='4'] {
+  font-size: 400%;
 }
 
 .app-safe-header {
@@ -463,7 +483,7 @@ html[data-platform='android'] {
     inset-inline: 0;
     top: 0;
     z-index: 10;
-    height: 2px;
+    height: 0.13rem;
     overflow: hidden;
     background: color-mix(in srgb, var(--color-cyan) 18%, transparent);
   }
@@ -546,7 +566,7 @@ html[data-platform='android'] {
   .ui-overlay-pop-enter-from,
   .ui-overlay-pop-leave-to {
     opacity: 0;
-    transform: translateY(-8px) scale(0.94);
+    transform: translateY(-0.5rem) scale(0.94);
   }
   .ui-overlay-pop-enter-to,
   .ui-overlay-pop-leave-from {
@@ -576,11 +596,11 @@ html[data-platform='android'] {
   }
   .ui-list-fade-enter-from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(0.5rem);
   }
   .ui-list-fade-leave-to {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-0.37rem);
   }
 
   /* 主视图 / Tab 面板切换 */
@@ -592,21 +612,21 @@ html[data-platform='android'] {
   }
   .ui-view-fade-enter-from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(0.63rem);
   }
   .ui-view-fade-leave-to {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-0.37rem);
   }
 
   /* 应用级 UI 原子样式（非 shadcn 原语） */
   .ui-label {
     /* 声明属性 margin-bottom */
-    margin-bottom: 6px;
+    margin-bottom: 0.38rem;
     /* 布局显示方式 */
     display: block;
     /* 字号 */
-    font-size: 11px;
+    font-size: 0.69rem;
     /* 字重 */
     font-weight: 600;
     /* 字距 */
@@ -617,13 +637,13 @@ html[data-platform='android'] {
 
   /* 应用级 UI 原子样式（非 shadcn 原语） */
   .ui-field {
-    height: 36px;
+    height: 2.25rem;
     width: 100%;
     border-radius: var(--app-radius-md);
     border: 1px solid var(--glass-border);
     background: linear-gradient(180deg, color-mix(in srgb, #000000 12%, transparent), transparent 55%), var(--glass-bg-soft);
-    padding-inline: 10px;
-    font-size: 13px;
+    padding-inline: 0.63rem;
+    font-size: 0.81rem;
     box-shadow:
       inset 0 2px 4px color-mix(in srgb, #000000 28%, transparent),
       inset 0 1px 0 color-mix(in srgb, #000000 18%, transparent),
@@ -671,13 +691,13 @@ html[data-platform='android'] {
     flex-direction: column;
     align-items: stretch;
     justify-content: center;
-    gap: 1px;
-    padding-inline: 1px;
+    gap: 0.06rem;
+    padding-inline: 0.06rem;
   }
 
   .ui-stepper-btn {
     display: inline-flex;
-    height: 11px;
+    height: 0.69rem;
     width: 1.25rem;
     align-items: center;
     justify-content: center;
@@ -710,12 +730,12 @@ html[data-platform='android'] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 30px;
+    height: 1.88rem;
     border-radius: var(--app-radius-md);
     border: 1px solid var(--glass-border);
     background: linear-gradient(180deg, color-mix(in srgb, #ffffff 8%, transparent), transparent 55%), var(--glass-bg-soft);
-    padding-inline: 10px;
-    font-size: 12.5px;
+    padding-inline: 0.63rem;
+    font-size: 0.78rem;
     font-weight: 500;
     letter-spacing: var(--app-type-tracking);
     color: var(--color-muted);
@@ -756,13 +776,13 @@ html[data-platform='android'] {
 
   /* 应用级 UI 原子样式（非 shadcn 原语） */
   .ui-btn-primary {
-    height: 36px;
+    height: 2.25rem;
     width: 100%;
     border-radius: var(--app-radius-md);
     border: 1px solid color-mix(in srgb, var(--color-cyan) 48%, transparent);
     background: linear-gradient(180deg, color-mix(in srgb, #2a9bb8 78%, transparent) 0%, color-mix(in srgb, #14586c 88%, transparent) 100%);
     color: #effbff;
-    font-size: 13px;
+    font-size: 0.81rem;
     font-weight: 600;
     letter-spacing: var(--app-type-tracking);
     box-shadow:
@@ -805,7 +825,7 @@ html[data-platform='android'] {
     /* 外边距 */
     margin: 0;
     /* 字号 */
-    font-size: 15px;
+    font-size: 0.94rem;
     /* 字重 */
     font-weight: 600;
     /* 字距 */
@@ -817,9 +837,9 @@ html[data-platform='android'] {
   /* 应用级 UI 原子样式（非 shadcn 原语） */
   .ui-subtitle {
     /* 外边距 */
-    margin: 2px 0 0;
+    margin: 0.13rem 0 0;
     /* 字号 */
-    font-size: 12px;
+    font-size: 0.75rem;
     /* 字重 */
     font-weight: 400;
     /* 文字颜色 */
@@ -1031,21 +1051,21 @@ html[data-platform='android'] {
     background-image:
       radial-gradient(ellipse 90% 55% at 50% -8%, color-mix(in srgb, #5ad6ff 18%, transparent), transparent 58%),
       radial-gradient(ellipse 45% 35% at 100% 100%, color-mix(in srgb, #1f7f9e 14%, transparent), transparent 55%),
-      linear-gradient(to right, color-mix(in srgb, #2a3342 30%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in srgb, #2a3342 30%, transparent) 1px, transparent 1px);
+      linear-gradient(to right, color-mix(in srgb, #2a3342 30%, transparent) 0.06rem, transparent 0.06rem),
+      linear-gradient(to bottom, color-mix(in srgb, #2a3342 30%, transparent) 0.06rem, transparent 0.06rem);
     background-size:
       auto,
       auto,
-      18px 18px,
-      18px 18px;
+      1.13rem 1.13rem,
+      1.13rem 1.13rem;
   }
 
   .ui-tab {
-    height: 30px;
+    height: 1.88rem;
     border-radius: var(--app-radius-md);
     border: 1px solid transparent;
-    padding-inline: 12px;
-    font-size: 13px;
+    padding-inline: 0.75rem;
+    font-size: 0.81rem;
     font-weight: 500;
     color: var(--color-muted);
     transition:
@@ -1083,7 +1103,7 @@ html[data-platform='android'] {
     filter: brightness(1.04);
   }
 
-  /* 边距充足时才允许轻微抬起；滚动/裁切容器强制归零 */
+  /* 边距充足时才允许轻微抬起；滚动/裁切容器及其子级强制归零 */
   .ui-hover-room {
     --glass-hover-shift: 1px;
   }
@@ -1094,9 +1114,25 @@ html[data-platform='android'] {
 
   .overflow-auto,
   .overflow-hidden,
+  .overflow-clip,
   .overflow-x-auto,
   .overflow-y-auto,
-  .overflow-scroll {
+  .overflow-scroll,
+  .overflow-auto .ui-hover-room,
+  .overflow-auto .ui-hover-room-lg,
+  .overflow-hidden .ui-hover-room,
+  .overflow-hidden .ui-hover-room-lg,
+  .overflow-clip .ui-hover-room,
+  .overflow-clip .ui-hover-room-lg,
+  .overflow-x-auto .ui-hover-room,
+  .overflow-x-auto .ui-hover-room-lg,
+  .overflow-y-auto .ui-hover-room,
+  .overflow-y-auto .ui-hover-room-lg,
+  .overflow-scroll .ui-hover-room,
+  .overflow-scroll .ui-hover-room-lg,
+  .ui-scroll-fade,
+  .ui-scroll-fade .ui-hover-room,
+  .ui-scroll-fade .ui-hover-room-lg {
     --glass-hover-shift: 0px;
   }
 
@@ -1105,9 +1141,9 @@ html[data-platform='android'] {
    * 无溢出时两端都不淡，避免短列表被无端削边。
    */
   .ui-scroll-fade {
-    --scroll-fade: 18px;
-    --fade-top: 0px;
-    --fade-bottom: 0px;
+    --scroll-fade: 0.5rem;
+    --fade-top: 0rem;
+    --fade-bottom: 0rem;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
     mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
     mask-size: 100% 100%;
@@ -1123,8 +1159,8 @@ html[data-platform='android'] {
   }
 
   .ui-status-dot {
-    width: 6px;
-    height: 6px;
+    width: 0.38rem;
+    height: 0.38rem;
     border-radius: 999px;
     flex-shrink: 0;
   }
@@ -1174,14 +1210,15 @@ html[data-platform='android'] {
     content: '';
     pointer-events: none;
     position: absolute;
-    inset: 1px;
+    inset: 0.06rem;
     border-radius: 6px;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, #000000 28%, transparent);
   }
 
   .ui-me-slot:hover {
     border-color: var(--glass-border-bright);
-    transform: translateY(-1px);
+    /* 抬起量走 --glass-hover-shift；裁切容器内为 0，避免顶边被遮挡 */
+    transform: translateY(calc(var(--glass-hover-shift) * -1));
     filter: saturate(1.06) brightness(1.04);
     box-shadow:
       inset 0 2px 3px color-mix(in srgb, #000000 42%, transparent),
@@ -1231,6 +1268,25 @@ html[data-platform='android'] {
     filter: saturate(0.92);
   }
 
+  /* 编码页空格：更浅的凹槽，提示可投放 */
+  .ui-me-slot--empty {
+    background: linear-gradient(155deg, color-mix(in srgb, var(--color-panel) 35%, transparent) 0%, color-mix(in srgb, var(--color-slot) 70%, #000000) 100%);
+    box-shadow:
+      inset 0 2px 5px color-mix(in srgb, #000000 48%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, #ffffff 6%, transparent),
+      0 1px 0 color-mix(in srgb, #ffffff 8%, transparent);
+  }
+
+  .ui-me-slot--empty::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0.38rem;
+    border-radius: 4px;
+    border: 1px dashed color-mix(in srgb, var(--color-line-bright) 35%, transparent);
+    opacity: 0.55;
+  }
+
   .ui-me-slot--static,
   .ui-me-slot--static:hover,
   .ui-me-slot--static:active {
@@ -1252,12 +1308,12 @@ html[data-platform='android'] {
   .ui-me-slot-amount {
     pointer-events: none;
     position: absolute;
-    right: 2px;
-    bottom: 1px;
+    right: 0.13rem;
+    bottom: 0.06rem;
     z-index: 1;
     border-radius: 3px;
-    padding: 1px 3px;
-    font-size: 10px;
+    padding: 0.06rem 0.19rem;
+    font-size: 0.63rem;
     line-height: 1;
     color: var(--color-cyan);
     background: color-mix(in srgb, var(--color-panel) 88%, transparent);
@@ -1272,7 +1328,7 @@ html[data-platform='android'] {
     position: relative;
     border-radius: 10px;
     border: 1px solid color-mix(in srgb, var(--color-line-bright) 40%, var(--glass-border));
-    padding: 12px 12px 11px;
+    padding: 0.75rem 0.75rem 0.69rem;
     background: linear-gradient(180deg, color-mix(in srgb, var(--color-panel) 42%, transparent) 0%, color-mix(in srgb, var(--color-slot) 70%, transparent) 100%);
     box-shadow:
       inset 0 2px 8px color-mix(in srgb, #000000 42%, transparent),
@@ -1298,7 +1354,7 @@ html[data-platform='android'] {
     min-width: 1.15rem;
     height: 1.15rem;
     border-radius: 999px;
-    font-size: 11px;
+    font-size: 0.69rem;
     line-height: 1;
     color: var(--color-muted);
     background: color-mix(in srgb, var(--color-panel) 70%, transparent);

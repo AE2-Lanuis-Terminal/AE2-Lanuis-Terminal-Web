@@ -87,11 +87,11 @@ onUnmounted(() => {
     <Transition name="ui-overlay-fade" appear>
       <div class="fixed inset-0 z-50 grid place-items-center bg-[rgba(8,10,14,0.55)] p-4 pt-[max(1rem,var(--safe-top))] pb-[max(1rem,var(--safe-bottom))] backdrop-blur-xl">
         <Transition name="ui-overlay-scale" appear>
-          <section class="ui-glass-strong w-full max-w-[400px] overflow-hidden rounded-[12px]">
+          <section class="ui-glass-strong w-full max-w-[25rem] overflow-hidden rounded-[12px]">
             <div class="flex items-center gap-3 border-b border-line px-4 py-3.5">
               <MeControllerLogo size="lg" />
               <div class="min-w-0">
-                <RainbowTitle as="h2" class="!text-[15px]" :text="t('auth.lead')" />
+                <RainbowTitle as="h2" class="!text-[0.94rem]" :text="t('auth.lead')" />
               </div>
             </div>
 
@@ -104,7 +104,7 @@ onUnmounted(() => {
                 <span class="ui-label">{{ t('auth.password') }}</span>
                 <input ref="webPasswordEl" v-model="password" class="ui-field mono" type="password" autocomplete="current-password" :placeholder="t('auth.passwordPlaceholder')" />
               </label>
-              <label class="inline-flex w-fit max-w-full items-center gap-2 text-[12.5px] text-muted">
+              <label class="inline-flex w-fit max-w-full items-center gap-2 text-[0.78rem] text-muted">
                 <input v-model="remember" type="checkbox" class="accent-cyan" />
                 <span>{{ t('auth.remember') }}</span>
               </label>
@@ -114,9 +114,9 @@ onUnmounted(() => {
               <p class="m-0 min-h-4 text-xs" :class="error ? 'text-red' : 'text-muted'">{{ message }}</p>
             </form>
 
-            <p class="border-t border-line px-4 py-3 text-[11px] leading-relaxed text-muted">
+            <p class="border-t border-line px-4 py-3 text-[0.69rem] leading-relaxed text-muted">
               {{ t('auth.note') }}
-              <code class="mt-1.5 block text-[11px]">{{ t('auth.cmd') }}</code>
+              <code class="mt-1.5 block text-[0.69rem]">{{ t('auth.cmd') }}</code>
             </p>
           </section>
         </Transition>
@@ -172,9 +172,9 @@ onUnmounted(() => {
         <p class="m-0 min-h-4 text-xs" :class="error ? 'text-red' : 'text-muted'">{{ message }}</p>
       </form>
 
-      <p class="mt-4 border-t border-line pt-3 text-[11px] leading-relaxed text-muted">
+      <p class="mt-4 border-t border-line pt-3 text-[0.69rem] leading-relaxed text-muted">
         {{ t('auth.note') }}
-        <code class="mt-1.5 block text-[11px]">{{ t('auth.cmd') }}</code>
+        <code class="mt-1.5 block text-[0.69rem]">{{ t('auth.cmd') }}</code>
       </p>
     </div>
   </div>

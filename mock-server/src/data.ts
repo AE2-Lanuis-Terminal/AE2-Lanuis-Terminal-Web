@@ -6,20 +6,19 @@ import type { CraftJob, Item, Pattern, PatternProvider } from './types.ts'
 
 export const MOCK_VERSION = '0.1.0-mock'
 
-function item(partial: Omit<Item, 'iconUrl' | 'key' | 'isFluid' | 'amountPerUnit' | 'kind'> & { id: string }): Item {
+function item(partial: Omit<Item, 'iconUrl' | 'key' | 'amountPerUnit' | 'kind'> & { id: string }): Item {
   const [ns, ...rest] = partial.id.split(':')
   const path = rest.join(':')
   return {
     ...partial,
     key: `item:${partial.id}`,
     kind: 'item',
-    isFluid: false,
     amountPerUnit: 1,
     iconUrl: `/api/v1/icons/item/${ns}/${path}`,
   }
 }
 
-function fluid(partial: Omit<Item, 'iconUrl' | 'key' | 'isFluid' | 'amountPerUnit' | 'craftable' | 'kind'> & { id: string; craftable?: boolean }): Item {
+function fluid(partial: Omit<Item, 'iconUrl' | 'key' | 'amountPerUnit' | 'craftable' | 'kind'> & { id: string; craftable?: boolean }): Item {
   const [ns, ...rest] = partial.id.split(':')
   const path = rest.join(':')
   return {
@@ -27,19 +26,17 @@ function fluid(partial: Omit<Item, 'iconUrl' | 'key' | 'isFluid' | 'amountPerUni
     ...partial,
     key: `fluid:${partial.id}`,
     kind: 'fluid',
-    isFluid: true,
     amountPerUnit: 1000,
     iconUrl: `/api/v1/icons/fluid/${ns}/${path}`,
   }
 }
 
 /** 预留类型样例：非 item/fluid，供「其他」筛选联调 */
-function other(partial: Omit<Item, 'iconUrl' | 'key' | 'isFluid' | 'amountPerUnit' | 'kind'> & { id: string }): Item {
+function other(partial: Omit<Item, 'iconUrl' | 'key' | 'amountPerUnit' | 'kind'> & { id: string }): Item {
   return {
     ...partial,
     key: `other:${partial.id}`,
     kind: 'other',
-    isFluid: false,
     amountPerUnit: 1,
     iconUrl: '',
   }

@@ -1,10 +1,9 @@
 /**
- * 跨接口共用结构。
+ * ME 库存/合成目录行
  */
 
 import type { ItemKindId } from '@/lib/itemKind'
 
-/** ME 库存/合成目录行 */
 export interface Item {
   /** 服务端稳定键（提交合成用） */
   key: string
@@ -16,16 +15,17 @@ export interface Item {
   amount: string
   /** 是否可自动合成 */
   craftable: boolean
-  /**
-   * 条目类型：item / fluid / other；未来可扩展。
-   * 缺省时前端用 isFluid / key 前缀回退。
-   */
+  /** 条目类型：item / fluid / other */
   kind?: ItemKindId | string
-  /** @deprecated 兼容旧接口；请用 kind。true 等价 kind=fluid */
-  isFluid?: boolean
   /** 一「单位」对应的内部数量（流体 Forge 常为 1000 mB） */
   amountPerUnit?: number
   iconUrl?: string
+  /** 合成计划材料：需求总数 */
+  total?: string
+  /** 合成计划材料：ME 库存 */
+  stock?: string
+  /** 合成计划材料：仍需合成/补齐 */
+  toCraft?: string
 }
 
 /** 通用分页查询 */

@@ -36,7 +36,7 @@ const slotClass = computed(() =>
   <div class="nodrag nopan relative size-9">
     <NodeToolbar :node-id="id" :is-visible="selected" :position="Position.Top" :offset="10" align="center">
       <div
-        class="pointer-events-none max-w-[16rem] rounded-md border border-line bg-[color-mix(in_srgb,var(--glass-bg)_96%,transparent)] px-2 py-1 text-[11px] leading-snug text-ink shadow-md"
+        class="pointer-events-none max-w-[16rem] rounded-md border border-line bg-[color-mix(in_srgb,var(--glass-bg)_96%,transparent)] px-2 py-1 text-[0.69rem] leading-snug text-ink shadow-md"
       >
         <span class="inline-flex max-w-full items-center gap-1">
           <McFormattedText v-if="data.item" class="truncate" :text="data.item.displayName" />

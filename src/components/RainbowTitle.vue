@@ -17,7 +17,7 @@ withDefaults(
 </script>
 
 <template>
-  <component :is="as" :class="cn('ui-rainbow-title truncate text-[13px] font-semibold tracking-[-0.02em]', $props.class)">
+  <component :is="as" :class="cn('ui-rainbow-title truncate text-[0.81rem] font-semibold tracking-[-0.02em]', $props.class)">
     {{ text }}
   </component>
 </template>

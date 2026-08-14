@@ -127,7 +127,7 @@ const triggerClass = computed(() =>
     hasAddon.value
       ? affixInnerClass(cn('justify-between gap-1.5 pr-1.5 [&_svg]:size-3.5 [&_svg]:shrink-0 [&_svg]:text-muted [&_svg]:opacity-80', fit.value ? 'w-auto flex-none' : 'w-full'))
       : cn(
-          'gap-1.5 rounded-[var(--app-radius-md)] border-[color:var(--glass-border)] bg-[var(--glass-bg-soft)] text-[13px] text-ink shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-[10px]',
+          'gap-1.5 rounded-[var(--app-radius-md)] border-[color:var(--glass-border)] bg-[var(--glass-bg-soft)] text-[0.81rem] text-ink shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-[10px]',
           'hover:border-[color:var(--glass-border-bright)] hover:bg-[var(--glass-bg)]',
           'focus-visible:border-cyan/55 focus-visible:ring-2 focus-visible:ring-cyan/20',
           'data-[state=open]:border-[color:var(--glass-border-bright)] data-[state=open]:bg-[var(--glass-bg)]',
@@ -135,7 +135,7 @@ const triggerClass = computed(() =>
           fit.value ? '!w-fit max-w-none flex-none' : 'w-full',
         ),
     props.compact ? 'h-8 min-h-8 px-2 py-0' : 'h-9 px-2.5',
-    preferTouchTargets() && !props.compact && !hasAddon.value && 'h-11 text-[15px]',
+    preferTouchTargets() && !props.compact && !hasAddon.value && 'h-11 text-[0.94rem]',
   ),
 )
 
@@ -165,7 +165,7 @@ const contentStyle = computed(() => {
 })
 
 const itemClass = cn(
-  'cursor-pointer rounded-[var(--app-radius-md)] py-1.5 text-[13px] text-ink outline-none',
+  'cursor-pointer rounded-[var(--app-radius-md)] py-1.5 text-[0.81rem] text-ink outline-none',
   'data-[highlighted]:bg-[color-mix(in_srgb,var(--color-cyan-dim)_22%,var(--glass-bg))] data-[highlighted]:text-ink',
   'data-[state=checked]:text-cyan',
   'focus:bg-[color-mix(in_srgb,var(--color-cyan-dim)_22%,var(--glass-bg))] focus:text-ink',

@@ -9,7 +9,6 @@ export type Item = {
   amount: string
   craftable: boolean
   kind?: string
-  isFluid?: boolean
   amountPerUnit?: number
   iconUrl?: string
 }

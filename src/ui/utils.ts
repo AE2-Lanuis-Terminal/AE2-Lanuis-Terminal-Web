@@ -20,9 +20,9 @@ export function touchAwareSize(desktop: BtnSize = 'default'): BtnSize {
 
 export function fieldClass(extra?: string) {
   return cn(
-    'h-9 rounded-[var(--app-radius-md)] border-[color:var(--glass-border)] bg-[var(--glass-bg-soft)] text-[13px] text-ink shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-[10px]',
+    'h-9 rounded-[var(--app-radius-md)] border-[color:var(--glass-border)] bg-[var(--glass-bg-soft)] text-[0.81rem] text-ink shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-[10px]',
     'placeholder:text-muted focus-visible:border-cyan/55 focus-visible:ring-cyan/20',
-    preferTouchTargets() && 'h-11 text-[15px]',
+    preferTouchTargets() && 'h-11 text-[0.94rem]',
     extra,
   )
 }
@@ -30,12 +30,12 @@ export function fieldClass(extra?: string) {
 /** 带 prefix / affix 的外壳：边框与玻璃态落在容器上 */
 export function affixShellClass(compact?: boolean, extra?: string) {
   return cn(
-    'group/affix flex min-w-0 items-center gap-0.5 rounded-[var(--app-radius-md)] border border-[color:var(--glass-border)] bg-[var(--glass-bg-soft)] text-[13px] text-ink shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-[10px]',
+    'group/affix flex min-w-0 items-center gap-0.5 rounded-[var(--app-radius-md)] border border-[color:var(--glass-border)] bg-[var(--glass-bg-soft)] text-[0.81rem] text-ink shadow-[inset_0_1px_0_var(--glass-highlight)] backdrop-blur-[10px]',
     'hover:border-[color:var(--glass-border-bright)] hover:bg-[var(--glass-bg)]',
     'focus-within:border-cyan/55 focus-within:ring-2 focus-within:ring-cyan/20',
     'has-[[data-state=open]]:border-[color:var(--glass-border-bright)] has-[[data-state=open]]:bg-[var(--glass-bg)]',
     compact ? 'h-8' : 'h-9',
-    preferTouchTargets() && !compact && 'h-11 text-[15px]',
+    preferTouchTargets() && !compact && 'h-11 text-[0.94rem]',
     extra,
   )
 }
@@ -48,7 +48,7 @@ export function affixInnerClass(extra?: string) {
 /** affix / prefix 内可点击控件 */
 export function affixActionClass(extra?: string) {
   return cn(
-    'inline-flex h-6 shrink-0 items-center justify-center gap-1 rounded-[var(--app-radius-sm)] px-1.5 text-[12px] font-medium text-muted transition-colors',
+    'inline-flex h-6 shrink-0 items-center justify-center gap-1 rounded-[var(--app-radius-sm)] px-1.5 text-[0.75rem] font-medium text-muted transition-colors',
     'hover:bg-[color-mix(in_srgb,var(--color-cyan-dim)_18%,transparent)] hover:text-ink',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan/25',
     'disabled:pointer-events-none disabled:opacity-50',

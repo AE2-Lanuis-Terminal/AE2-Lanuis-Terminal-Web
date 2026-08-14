@@ -8,7 +8,7 @@ import { useI18n } from 'vue-i18n'
 import { api, type Pattern, type PatternProvider, type PatternProviderBoard, type PatternMoveOp } from '../api/client'
 import ItemIcon from './ItemIcon.vue'
 import McFormattedText from './McFormattedText.vue'
-import PatternItemSlot from './PatternItemSlot.vue'
+import ItemSlot from './ItemSlot.vue'
 import PatternMoveTargetDialog from './PatternMoveTargetDialog.vue'
 import PatternRecipePreview from './PatternRecipePreview.vue'
 import ScrollFade from './ScrollFade.vue'
@@ -61,7 +61,8 @@ const selectedCount = computed(() => selectedKeys.value.size)
 const dragging = computed(() => dragKeys.value.length > 0)
 
 const slotSizeClass = touchUi ? 'size-12' : 'size-11'
-const gridMaxClass = touchUi ? 'max-w-[calc(3rem*9+0.375rem*8)]' : 'max-w-[calc(2.75rem*9+0.375rem*8)]'
+/** 每行最多 9 格；窄于 9 格宽度时换行，禁止挤扁叠层 */
+const slotGridClass = touchUi ? 'flex max-w-[min(100%,calc(3rem*9+0.375rem*8))] flex-wrap gap-1.5' : 'flex max-w-[min(100%,calc(2.75rem*9+0.375rem*8))] flex-wrap gap-1.5'
 
 const ghostPattern = computed(() => {
   const key = dragKeys.value[0]
@@ -137,7 +138,7 @@ function modeTagClass() {
   return cn(
     'inline-flex w-fit items-center rounded-[4px] border border-line',
     'bg-[color-mix(in_srgb,var(--glass-bg-soft)_88%,transparent)] px-1.5 py-0.5',
-    'text-[10px] font-medium leading-none tracking-[0.02em] text-muted',
+    'text-[0.63rem] font-medium leading-none tracking-[0.02em] text-muted',
   )
 }
 
@@ -528,9 +529,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="flex h-full min-h-[240px] min-w-[280px] flex-col overflow-hidden" :class="dragging && 'pattern-board--dragging'">
+  <section class="flex h-full min-h-[15rem] min-w-[17.5rem] flex-col overflow-hidden" :class="dragging && 'pattern-board--dragging'">
     <div class="mb-3 flex shrink-0 flex-wrap items-center gap-2">
-      <AppInput v-model="qOutput" compact mono class="min-w-[9rem] flex-1 basis-[9rem]" :placeholder="t('patterns.searchOutput')" />
+      <AppInput v-model="qOutput" compact mono class="min-w-[9rem] flex-1 basis-[9rem]" :placeholder="t('patterns.searchOutput')">
+        <template #affix>
+          <button type="button" :class="affixActionClass()" @click="load">
+            {{ t('common.query') }}
+          </button>
+        </template>
+      </AppInput>
       <AppInput v-model="qInput" compact mono class="min-w-[9rem] flex-1 basis-[9rem]" :placeholder="t('patterns.searchInput')">
         <template #affix>
           <button type="button" :class="affixActionClass()" @click="load">
@@ -539,13 +546,13 @@ onUnmounted(() => {
         </template>
       </AppInput>
       <AppSelect v-model="mode" compact :options="modeOptions" :aria-label="t('patterns.mode')" />
-      <AppButton type="button" size="sm" :variant="selectMode ? 'primary' : 'outline'" @click="toggleSelectMode">
+      <button type="button" class="ui-btn !h-8" :class="selectMode ? '!border-cyan/50 !text-cyan' : undefined" :aria-pressed="selectMode" @click="toggleSelectMode">
         {{ selectMode ? t('patterns.selectDone') : t('patterns.select') }}
-      </AppButton>
+      </button>
     </div>
 
     <div v-if="selectMode" class="ui-glass-chip mb-2 flex shrink-0 flex-wrap items-center gap-2 rounded-[8px] px-2.5 py-1.5">
-      <span class="text-[12px] text-muted">{{ t('patterns.selectedCount', { n: selectedCount }) }}</span>
+      <span class="text-[0.75rem] text-muted">{{ t('patterns.selectedCount', { n: selectedCount }) }}</span>
       <AppButton type="button" size="sm" variant="outline" :disabled="!selectedCount" @click="clearSelection">
         {{ t('patterns.clearSelection') }}
       </AppButton>
@@ -554,11 +561,11 @@ onUnmounted(() => {
       </AppButton>
     </div>
 
-    <p v-else-if="touchUi && providers.length" class="mb-2 shrink-0 text-[11px] text-muted">
+    <p v-else-if="touchUi && providers.length" class="mb-2 shrink-0 text-[0.69rem] text-muted">
       {{ t('patterns.dragHintTouch') }}
     </p>
 
-    <p v-if="error || moveError" class="mb-2 shrink-0 text-[13px] text-red">{{ error || moveError }}</p>
+    <p v-if="error || moveError" class="mb-2 shrink-0 text-[0.81rem] text-red">{{ error || moveError }}</p>
 
     <div class="relative min-h-0 flex-1" :aria-busy="loading || undefined">
       <div v-if="loading" class="ui-loading-bar" role="status" :aria-label="t('common.loading')" />
@@ -592,22 +599,22 @@ onUnmounted(() => {
                   <span class="inline-flex size-5 shrink-0 items-center justify-center" aria-hidden="true">
                     <ChevronDownIcon class="size-3.5 transition-transform duration-200 ease-out" :class="isCollapsed(board.id) && '-rotate-90'" />
                   </span>
-                  <h3 class="m-0 text-[12px] font-semibold tracking-[-0.01em] text-ink">
+                  <h3 class="m-0 text-[0.75rem] font-semibold tracking-[-0.01em] text-ink">
                     <McFormattedText :text="board.name || t('patterns.providerUnknown')" />
                   </h3>
                 </button>
                 <span
-                  class="mono rounded-[4px] border border-line bg-[color-mix(in_srgb,var(--glass-bg-soft)_88%,transparent)] px-1.5 py-0.5 text-[10px] text-cyan"
+                  class="mono rounded-[4px] border border-line bg-[color-mix(in_srgb,var(--glass-bg-soft)_88%,transparent)] px-1.5 py-0.5 text-[0.63rem] text-cyan"
                   :title="t('patterns.capacityHint')"
                 >
                   {{ capacityText(board) }}
                 </span>
-                <span v-if="board.movable === false" class="text-[10px] text-muted">{{ t('patterns.notMovable') }}</span>
-                <span v-if="providerPosText(board)" class="mono text-[11px] text-muted">{{ providerPosText(board) }}</span>
+                <span v-if="board.movable === false" class="text-[0.63rem] text-muted">{{ t('patterns.notMovable') }}</span>
+                <span v-if="providerPosText(board)" class="mono text-[0.69rem] text-muted">{{ providerPosText(board) }}</span>
                 <button
                   v-if="selectMode && board.movable !== false && !isCollapsed(board.id)"
                   type="button"
-                  class="ml-auto text-[11px] text-cyan hover:underline"
+                  class="ml-auto text-[0.69rem] text-cyan hover:underline"
                   @click="selectAllGroup(board)"
                 >
                   {{ t('patterns.selectAllGroup') }}
@@ -616,11 +623,11 @@ onUnmounted(() => {
 
               <div class="grid transition-[grid-template-rows] duration-200 ease-out" :class="isCollapsed(board.id) ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'">
                 <div class="min-h-0" :class="isCollapsed(board.id) ? 'overflow-hidden' : 'overflow-visible'">
-                  <div class="grid grid-cols-9 gap-1.5 py-0.5" :class="gridMaxClass">
+                  <div class="py-0.5" :class="slotGridClass">
                     <div
                       v-for="slot in board.slots"
                       :key="`${board.id}:${slot.index}`"
-                      class="relative"
+                      class="relative shrink-0"
                       :class="slotSizeClass"
                       data-pattern-drop-slot
                       :data-pattern-provider-id="board.id"
@@ -655,7 +662,7 @@ onUnmounted(() => {
                       </div>
                       <span
                         v-if="selectMode && slot.pattern"
-                        class="pointer-events-none absolute -top-1 -right-1 z-[2] flex size-3.5 items-center justify-center rounded-[3px] border border-line text-[8px] leading-none"
+                        class="pointer-events-none absolute -top-1 -right-1 z-[2] flex size-3.5 items-center justify-center rounded-[3px] border border-line text-[0.5rem] leading-none"
                         :class="isSelected(board.id, slot.index) ? 'bg-cyan text-[#041018]' : 'bg-[color-mix(in_srgb,var(--color-panel)_80%,transparent)] text-muted'"
                       >
                         {{ isSelected(board.id, slot.index) ? '✓' : '' }}
@@ -690,20 +697,20 @@ onUnmounted(() => {
     <AppDialog :open="detailOpen" class="min-w-[18rem] max-w-[min(100%-1.5rem,28rem)] sm:max-w-[28rem]" @update:open="onDetailOpen">
       <template #header>
         <div class="flex items-center gap-2.5 pr-7">
-          <PatternItemSlot v-if="selected?.primaryOutput" :item="selected.primaryOutput" :size="34" amount="" variant="output" :tip="false" />
+          <ItemSlot v-if="selected?.primaryOutput" :item="selected.primaryOutput" :size="34" amount="" variant="output" plain />
           <div class="min-w-0">
             <span v-if="selected" :class="modeTagClass()">{{ modeLabel(selected.mode) }}</span>
-            <h2 class="m-0 mt-0.5 text-[13px] font-semibold tracking-[-0.02em]">
+            <h2 class="m-0 mt-0.5 text-[0.81rem] font-semibold tracking-[-0.02em]">
               <McFormattedText v-if="selected" :text="patternTitle(selected)" />
               <template v-else>{{ t('patterns.detail') }}</template>
             </h2>
-            <p v-if="selected" class="mono m-0 mt-0.5 truncate text-[11px] text-muted">{{ selected.id }}</p>
+            <p v-if="selected" class="mono m-0 mt-0.5 truncate text-[0.69rem] text-muted">{{ selected.id }}</p>
           </div>
         </div>
       </template>
 
       <template v-if="selected">
-        <div class="grid gap-1 text-[12px] text-muted">
+        <div class="grid gap-1 text-[0.75rem] text-muted">
           <p class="m-0">
             {{ t('patterns.workMode') }}:
             <span class="text-ink">{{ modeLabel(selected.mode) }}</span>
@@ -716,7 +723,7 @@ onUnmounted(() => {
             {{ t('patterns.encoder') }}:
             <span class="text-ink">{{ selected.encoder }}</span>
           </p>
-          <p v-if="selected.recipeId" class="mono m-0 text-[11px]">
+          <p v-if="selected.recipeId" class="mono m-0 text-[0.69rem]">
             {{ t('patterns.recipeId') }}:
             <span class="text-ink">{{ selected.recipeId }}</span>
           </p>
@@ -732,7 +739,7 @@ onUnmounted(() => {
             {{ t('patterns.priority') }}:
             <span class="mono text-ink">{{ selected.provider.priority }}</span>
           </p>
-          <p v-if="providerPosText(selected.provider)" class="mono m-0 text-[11px]">
+          <p v-if="providerPosText(selected.provider)" class="mono m-0 text-[0.69rem]">
             {{ providerPosText(selected.provider) }}
           </p>
           <p v-if="providerTargetsText(selected.provider)" class="m-0">
@@ -796,15 +803,15 @@ onUnmounted(() => {
 /* HTML5 setDragImage 挂到 body：屏外供截图 */
 body > .pattern-drag-ghost-root {
   position: fixed;
-  top: -9999px;
-  left: -9999px;
+  top: -624.94rem;
+  left: -624.94rem;
 }
 
 .pattern-drag-ghost {
   box-sizing: border-box;
   overflow: hidden;
   border-radius: 7px;
-  clip-path: inset(0 round 7px);
+  clip-path: inset(0 round 0.44rem);
   border: 1px solid color-mix(in srgb, var(--color-line-bright) 55%, var(--glass-border));
   background: linear-gradient(155deg, color-mix(in srgb, var(--color-panel) 55%, transparent) 0%, color-mix(in srgb, var(--color-slot) 88%, #000000) 100%);
   box-shadow:
@@ -848,19 +855,19 @@ body > .pattern-drag-ghost-root {
 
 .pattern-drag-ghost__badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -0.31rem;
+  right: -0.31rem;
   z-index: 2;
   display: flex;
   min-width: 1.15rem;
   height: 1.15rem;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
+  padding: 0 0.25rem;
   border-radius: 4px;
   background: var(--color-cyan, #3cf);
   color: #041018;
-  font-size: 10px;
+  font-size: 0.63rem;
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 1px 4px color-mix(in srgb, #000000 40%, transparent);

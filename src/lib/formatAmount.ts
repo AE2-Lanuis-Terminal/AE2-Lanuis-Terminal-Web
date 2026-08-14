@@ -40,7 +40,7 @@ export function formatCompactCount(amount: string | number | bigint): string {
   return n.toString()
 }
 
-export function formatStackAmount(item: Pick<Item, 'amount' | 'kind' | 'isFluid' | 'key' | 'amountPerUnit'>): string {
+export function formatStackAmount(item: Pick<Item, 'amount' | 'kind' | 'amountPerUnit'>): string {
   const raw = BigInt(item.amount || '0')
   if (resolveItemKind(item) !== 'fluid') {
     return formatCompactCount(raw)
@@ -64,7 +64,7 @@ export function formatStackAmount(item: Pick<Item, 'amount' | 'kind' | 'isFluid'
 }
 
 /** 弹窗内展示的精确数量（物品为个数，流体为内部单位 mB） */
-export function formatExactAmount(item: Pick<Item, 'amount' | 'kind' | 'isFluid' | 'key'>): string {
+export function formatExactAmount(item: Pick<Item, 'amount' | 'kind'>): string {
   const raw = item.amount || '0'
   return resolveItemKind(item) === 'fluid' ? `${raw} mB` : raw
 }

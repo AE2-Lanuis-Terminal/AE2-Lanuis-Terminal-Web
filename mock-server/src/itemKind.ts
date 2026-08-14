@@ -2,14 +2,9 @@
 
 export type ItemKindId = 'item' | 'fluid' | 'other'
 
-export function resolveItemKind(item: { kind?: string | null; isFluid?: boolean; key?: string }): ItemKindId {
+export function resolveItemKind(item: { kind?: string | null }): ItemKindId {
   const raw = (item.kind || '').trim().toLowerCase()
   if (raw === 'item' || raw === 'fluid' || raw === 'other') return raw
-  if (raw) return 'other'
-  if (item.isFluid) return 'fluid'
-  const key = item.key || ''
-  if (key.startsWith('fluid:')) return 'fluid'
-  if (key.startsWith('item:')) return 'item'
   return 'other'
 }
 

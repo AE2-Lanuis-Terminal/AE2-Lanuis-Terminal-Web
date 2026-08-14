@@ -7,6 +7,7 @@ import { defineAsyncComponent, onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import SettingsDialog from './components/SettingsDialog.vue'
 import ModeChooserDialog from './components/ModeChooserDialog.vue'
+import AppToastHost from './components/AppToastHost.vue'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { isDesktopChrome } from './lib/runtime'
 import { useSettingsStore } from './stores/settings'
@@ -25,6 +26,7 @@ onMounted(() => {
     <RouterView />
     <SettingsDialog />
     <ModeChooserDialog />
+    <AppToastHost />
     <DesktopShellHost v-if="desktop" />
   </TooltipProvider>
 </template>

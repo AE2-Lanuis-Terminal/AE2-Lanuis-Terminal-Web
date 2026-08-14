@@ -19,7 +19,7 @@ const props = defineProps<{
     <Label
       v-if="label || $slots.label"
       :for="htmlFor"
-      class="ui-label !mb-0 text-[11px] font-semibold tracking-[0.02em] text-[color-mix(in_srgb,var(--color-ink)_72%,var(--color-muted))]"
+      class="ui-label !mb-0 text-[0.69rem] font-semibold tracking-[0.02em] text-[color-mix(in_srgb,var(--color-ink)_72%,var(--color-muted))]"
     >
       <!-- UI 结构 -->
       <slot name="label">{{ label }}</slot>

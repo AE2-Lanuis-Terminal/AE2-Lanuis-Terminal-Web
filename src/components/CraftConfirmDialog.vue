@@ -1,10 +1,11 @@
 <!--
-  合成确认：摘要 + 指定 CPU + 配方树画布；canSubmit 才可提交。
+  合成确认：摘要 + CPU + 材料列表（总数/库存/要合成）；合成树另开弹窗。
 -->
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { CraftPlanResponse } from '@/types'
+import { NetworkIcon } from '@lucide/vue'
+import type { CraftPlanResponse, Item } from '@/types'
 import ItemIcon from './ItemIcon.vue'
 import McFormattedText from './McFormattedText.vue'
 import CraftRecipeTree from './CraftRecipeTree.vue'
@@ -25,6 +26,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const busy = ref(false)
 const message = ref('')
+const treeOpen = ref(false)
 /** `__auto__` = 自动选择（Reka Select 禁止空字符串 value） */
 const CPU_AUTO = '__auto__'
 const selectedCpu = ref(CPU_AUTO)
@@ -36,9 +38,12 @@ watch(
   (v) => {
     if (v) {
       message.value = ''
+      treeOpen.value = false
       if (props.plan) viewPlan.value = props.plan
       const suitable = (viewPlan.value?.cpus ?? []).filter((c) => c.suitable)
-      selectedCpu.value = suitable.length === 1 ? suitable[0].cpuName : CPU_AUTO
+      selectedCpu.value = suitable.length === 1 ? suitable[0]!.cpuName : CPU_AUTO
+    } else {
+      treeOpen.value = false
     }
   },
 )
@@ -60,6 +65,36 @@ const cpuOptions = computed<AppSelectOption[]>(() => {
     })
   }
   return opts
+})
+
+/** 材料行：优先用接口 total/stock/toCraft，否则用 used+missing 拼 */
+const materialRows = computed(() => {
+  const plan = viewPlan.value
+  if (!plan) return [] as Array<Item & { total: string; stock: string; toCraft: string }>
+  const missingMap = new Map(plan.missing.map((m) => [m.key, m]))
+  const rows: Array<Item & { total: string; stock: string; toCraft: string }> = []
+  const seen = new Set<string>()
+
+  for (const it of plan.usedItems ?? []) {
+    seen.add(it.key)
+    const miss = missingMap.get(it.key)
+    const usedAmt = BigInt(it.amount || '0')
+    const missAmt = BigInt(miss?.amount || '0')
+    const total = it.total ?? String(usedAmt + missAmt)
+    const stock = it.stock ?? it.amount
+    const toCraft = it.toCraft ?? (miss ? miss.amount : '0')
+    rows.push({ ...it, total, stock, toCraft })
+  }
+  for (const miss of plan.missing) {
+    if (seen.has(miss.key)) continue
+    rows.push({
+      ...miss,
+      total: miss.total ?? miss.amount,
+      stock: miss.stock ?? '0',
+      toCraft: miss.toCraft ?? miss.amount,
+    })
+  }
+  return rows
 })
 
 function onOpen(v: boolean) {
@@ -104,13 +139,21 @@ function modeLabel(mode?: string) {
   }
   return map[mode] || mode
 }
+
+function needsCraft(row: { toCraft: string }) {
+  try {
+    return BigInt(row.toCraft || '0') > 0n
+  } catch {
+    return Number(row.toCraft) > 0
+  }
+}
 </script>
 
 <template>
   <AppDialog
     :open="open"
     :layer="1"
-    class="!flex !max-h-[min(92vh,56rem)] !w-[min(96vw,80rem)] !min-w-0 !max-w-[min(96vw,80rem)] !flex-col sm:!max-w-[min(96vw,80rem)]"
+    class="!flex !max-h-[min(92vh,40rem)] !w-[min(96vw,36rem)] !min-w-0 !max-w-[min(96vw,36rem)] !flex-col sm:!max-w-[min(96vw,36rem)]"
     @update:open="onOpen"
   >
     <template #header>
@@ -119,7 +162,7 @@ function modeLabel(mode?: string) {
           <ItemIcon :item="viewPlan.output" />
         </span>
         <div class="min-w-0">
-          <h2 class="m-0 text-[13px] font-semibold tracking-[-0.02em]">
+          <h2 class="m-0 text-[0.81rem] font-semibold tracking-[-0.02em]">
             <template v-if="viewPlan?.output">
               <McFormattedText :text="viewPlan.output.displayName" />
               <span class="mono text-cyan"> × {{ viewPlan.output.amount }}</span>
@@ -130,8 +173,22 @@ function modeLabel(mode?: string) {
     </template>
 
     <template v-if="viewPlan">
-      <div class="flex h-full min-h-0 flex-1 flex-col gap-1.5 overflow-hidden">
-        <div class="grid shrink-0 gap-1 text-[12px]">
+      <div class="relative flex h-full min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+        <AppButton
+          v-if="viewPlan.tree"
+          type="button"
+          variant="outline"
+          size="sm"
+          class="absolute top-0 right-0 z-[1] !h-7 gap-1 !px-2"
+          :aria-label="t('craft.viewTree')"
+          :title="t('craft.viewTree')"
+          @click="treeOpen = true"
+        >
+          <NetworkIcon class="size-3.5" aria-hidden="true" />
+          <span class="text-[0.69rem]">{{ t('craft.viewTree') }}</span>
+        </AppButton>
+
+        <div class="grid shrink-0 gap-1 pr-24 text-[0.75rem]">
           <p class="mono m-0">
             {{ t('craft.bytes', { bytes: viewPlan.bytes }) }}
             <span class="text-muted"> / {{ t('craft.bytesAvailable', { bytes: viewPlan.bytesAvailable }) }}</span>
@@ -140,33 +197,48 @@ function modeLabel(mode?: string) {
             {{ t('craft.coProcessors', { count: viewPlan.coProcessors }) }}
             · {{ t('craft.idleCpu', { idle: viewPlan.idleCpuCount, total: viewPlan.cpuCount }) }}
           </p>
-          <p v-if="viewPlan.multiplePaths" class="m-0 text-[11px] text-amber">{{ t('craft.multiplePaths') }}</p>
+          <p v-if="viewPlan.multiplePaths" class="m-0 text-[0.69rem] text-amber">{{ t('craft.multiplePaths') }}</p>
           <p v-if="viewPlan.warning" class="m-0 text-amber">{{ viewPlan.warning }}</p>
         </div>
 
-        <label class="grid shrink-0 gap-1">
-          <span class="text-xs text-muted">{{ t('craft.selectCpu') }}</span>
-          <AppSelect v-model="selectedCpu" compact :options="cpuOptions" :aria-label="t('craft.selectCpu')" />
+        <label class="flex shrink-0 items-center gap-2 pr-24">
+          <span class="shrink-0 text-xs text-muted">{{ t('craft.selectCpu') }}</span>
+          <AppSelect v-model="selectedCpu" class="min-w-0 flex-1" compact :options="cpuOptions" :aria-label="t('craft.selectCpu')" />
         </label>
 
-        <div v-if="viewPlan.missing.length" class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden text-[12px] text-amber">
-          <strong class="shrink-0">{{ t('craft.missing') }}</strong>
-          <ul class="m-0 min-h-0 list-none flex-1 space-y-1 overflow-y-auto overscroll-contain pl-0">
-            <li v-for="m in viewPlan.missing" :key="m.key" class="flex items-center gap-2">
-              <span class="inline-block size-4 shrink-0">
-                <ItemIcon :item="m" />
-              </span>
-              <span class="min-w-0 truncate"><McFormattedText :text="m.displayName" /> × {{ formatStackAmount(m) }}</span>
-            </li>
-          </ul>
-        </div>
-
-        <div v-if="viewPlan.tree" class="shrink-0 border-t border-line pt-2" :class="viewPlan.missing.length ? undefined : 'min-h-0 flex-1'">
-          <div
-            class="w-full overflow-hidden rounded-md border border-line"
-            :class="viewPlan.missing.length ? 'h-[min(36vh,18rem)] min-h-[10rem]' : 'h-full min-h-[12rem] max-h-[min(45vh,24rem)]'"
-          >
-            <CraftRecipeTree :node="viewPlan.tree" :mode-label="modeLabel" />
+        <div class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
+          <strong class="shrink-0 text-[0.75rem]">{{ t('craft.materials') }}</strong>
+          <div class="min-h-0 flex-1 overflow-auto overscroll-contain rounded-[8px] border border-line">
+            <table class="w-full border-collapse text-left text-[0.75rem]">
+              <thead class="sticky top-0 z-[1] bg-[color:var(--glass-bg-strong)] text-[0.63rem] tracking-wide text-muted">
+                <tr>
+                  <th class="px-2 py-1.5 font-medium">{{ t('craft.colItem') }}</th>
+                  <th class="mono px-2 py-1.5 text-right font-medium">{{ t('craft.colTotal') }}</th>
+                  <th class="mono px-2 py-1.5 text-right font-medium">{{ t('craft.colStock') }}</th>
+                  <th class="mono px-2 py-1.5 text-right font-medium">{{ t('craft.colToCraft') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in materialRows" :key="row.key" class="border-t border-line/70">
+                  <td class="px-2 py-1.5">
+                    <div class="flex min-w-0 items-center gap-2">
+                      <span class="inline-block size-5 shrink-0">
+                        <ItemIcon :item="row" />
+                      </span>
+                      <span class="min-w-0 truncate"><McFormattedText :text="row.displayName" /></span>
+                    </div>
+                  </td>
+                  <td class="mono px-2 py-1.5 text-right text-ink">{{ formatStackAmount({ ...row, amount: row.total }) }}</td>
+                  <td class="mono px-2 py-1.5 text-right text-muted">{{ formatStackAmount({ ...row, amount: row.stock }) }}</td>
+                  <td class="mono px-2 py-1.5 text-right" :class="needsCraft(row) ? 'text-amber' : 'text-muted'">
+                    {{ formatStackAmount({ ...row, amount: row.toCraft }) }}
+                  </td>
+                </tr>
+                <tr v-if="!materialRows.length">
+                  <td colspan="4" class="px-2 py-6 text-center text-muted">{{ t('patterns.empty') }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -181,6 +253,27 @@ function modeLabel(mode?: string) {
       <AppButton type="button" variant="primary" size="sm" :disabled="!viewPlan?.canSubmit || busy" @click="submit">
         {{ t('craft.submit') }}
       </AppButton>
+    </template>
+
+    <template #nested>
+      <AppDialog
+        :open="treeOpen"
+        :layer="2"
+        class="!flex !max-h-[min(92vh,48rem)] !w-[min(96vw,80rem)] !min-w-0 !max-w-[min(96vw,80rem)] !flex-col sm:!max-w-[min(96vw,80rem)]"
+        @update:open="treeOpen = $event"
+      >
+        <template #header>
+          <h2 class="m-0 pr-7 text-[0.81rem] font-semibold tracking-[-0.02em]">{{ t('craft.treeTitle') }}</h2>
+        </template>
+        <div v-if="viewPlan?.tree" class="h-[min(70vh,36rem)] min-h-[16rem] w-full overflow-hidden rounded-md border border-line">
+          <CraftRecipeTree :node="viewPlan.tree" :mode-label="modeLabel" />
+        </div>
+        <template #footer>
+          <AppButton type="button" variant="outline" size="sm" @click="treeOpen = false">
+            {{ t('common.close') }}
+          </AppButton>
+        </template>
+      </AppDialog>
     </template>
   </AppDialog>
 </template>

@@ -1,16 +1,20 @@
 <!--
-  App* 封装组件：统一 Fluix 外观与触控尺寸；业务勿直连 components/ui。
+  App* 封装：Fluix 风格开关；关闭态保持可见轨道。业务勿直连 components/ui。
 -->
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 
-const props = defineProps<{
-  modelValue?: boolean
-  class?: HTMLAttributes['class']
-  disabled?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue?: boolean
+    class?: HTMLAttributes['class']
+    disabled?: boolean
+    size?: 'sm' | 'default'
+  }>(),
+  { size: 'default' },
+)
 
 defineEmits<{
   'update:modelValue': [value: boolean]
@@ -18,11 +22,5 @@ defineEmits<{
 </script>
 
 <template>
-  <!-- UI 结构 -->
-  <Switch
-    :model-value="modelValue"
-    :disabled="disabled"
-    :class="cn('data-[state=checked]:bg-cyan', props.class)"
-    @update:model-value="$emit('update:modelValue', Boolean($event))"
-  />
+  <Switch :model-value="modelValue" :disabled="disabled" :size="size" :class="cn(props.class)" @update:model-value="$emit('update:modelValue', Boolean($event))" />
 </template>

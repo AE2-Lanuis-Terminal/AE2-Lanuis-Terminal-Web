@@ -52,10 +52,10 @@ const contentZClass = computed(() => {
     >
       <DialogHeader v-if="title || description || $slots.header" class="shrink-0 border-b border-line px-3 py-2.5 text-left">
         <slot name="header">
-          <DialogTitle v-if="title" class="text-[14px] font-semibold tracking-[-0.02em]">
+          <DialogTitle v-if="title" class="text-[0.88rem] font-semibold tracking-[-0.02em]">
             {{ title }}
           </DialogTitle>
-          <DialogDescription v-if="description" class="mt-1 text-[12px] text-muted">
+          <DialogDescription v-if="description" class="mt-1 text-[0.75rem] text-muted">
             {{ description }}
           </DialogDescription>
         </slot>

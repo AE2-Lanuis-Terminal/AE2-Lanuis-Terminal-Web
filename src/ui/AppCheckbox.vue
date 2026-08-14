@@ -28,7 +28,7 @@ function onUpdate(v: boolean | 'indeterminate') {
 
 <template>
   <!-- w-fit：grid 表单里不要拉满行宽，仅勾选框+文案可点 -->
-  <label :class="cn('inline-flex w-fit max-w-full items-center gap-2 text-[12.5px] text-muted', preferTouchTargets() && 'min-h-11 gap-3 text-[14px]', props.class)">
+  <label :class="cn('inline-flex w-fit max-w-full items-center gap-2 text-[0.78rem] text-muted', preferTouchTargets() && 'min-h-11 gap-3 text-[0.88rem]', props.class)">
     <Checkbox
       :id="cid"
       :model-value="modelValue === true"

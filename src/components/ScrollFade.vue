@@ -12,12 +12,12 @@ const SHOW_AFTER_PX = 72
 const props = withDefaults(
   defineProps<{
     class?: string
-    /** 渐隐高度，默认 18px */
+    /** 渐隐高度（设计稿 px，渲染为 rem） */
     fade?: number
     /** 关闭回到顶部按钮 */
     backTop?: boolean
   }>(),
-  { fade: 18, backTop: true },
+  { fade: 8, backTop: true },
 )
 
 const { t } = useI18n()
@@ -80,7 +80,7 @@ defineExpose({
     <div
       ref="root"
       class="ui-scroll-fade col-start-1 row-start-1 min-h-0 min-w-0 overflow-auto"
-      :style="{ '--scroll-fade': `${fade}px` }"
+      :style="{ '--scroll-fade': `${Math.round((fade / 16) * 100) / 100}rem` }"
       :data-fade-top="fadeTop ? 'true' : 'false'"
       :data-fade-bottom="fadeBottom ? 'true' : 'false'"
     >

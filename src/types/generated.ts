@@ -4,1138 +4,1383 @@
  */
 
 export interface paths {
-  '/api/v1/health': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** 健康检查与 WebSocket 发现 */
-    get: operations['health']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/auth/login': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** 登录 */
-    post: operations['login']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/auth/logout': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** 注销（Bearer，幂等） */
-    post: operations['logout']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/auth/session': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** 会话探测 */
-    get: operations['session']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/admin/bindings': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * 管理员查看全部绑定端点与在线状态（需 OP）
-     * @description 要求当前会话玩家达到 `auth.adminPermissionLevel`（默认 2，与原版 OP/gamemaster 一致）。
-     *     返回每位已设密玩家的终端端点摘要、玩家是否在线、AE 网络是否可解析/通电。
-     */
-    get: operations['adminListBindings']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/admin/session/act-as': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** 管理员切入目标玩家绑定（进入其用户端网络） */
-    post: operations['adminActAs']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/admin/session/clear-act-as': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** 退出切入，回到管理员本人绑定 */
-    post: operations['adminClearActAs']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/admin/audit': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** 审计日志分页（需 OP） */
-    get: operations['adminAudit']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/items': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** ME 库存分页 */
-    get: operations['listItems']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/patterns': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** ME 已安装样板分页 */
-    get: operations['listPatterns']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/pattern-providers': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * 样板供应器槽位板（含空槽与容量）
-     * @description 返回网络内可枚举的样板供应器及完整槽位（含空槽）。
-     *     Patterns 页主数据源；搜索仍可用 GET /api/v1/patterns。
-     */
-    get: operations['listPatternProviders']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/patterns/move': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * 移动/重排样板槽位（支持批量，事务性）
-     * @description 在供应器 patternInv 槽位间移动或交换。
-     *     to.slotIndex 省略时填入目标供应器第一个空槽。
-     *     任一条失败则全部回滚。
-     */
-    post: operations['movePatterns']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/crafting/catalog': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** 可合成目录 */
-    get: operations['craftingCatalog']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/crafting/plan': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** 合成计划 */
-    post: operations['craftingPlan']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/crafting/submit': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** 提交合成 */
-    post: operations['craftingSubmit']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/crafting/jobs': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** 进行中作业 */
-    get: operations['craftingJobs']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/crafting/cancel': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** 取消合成 */
-    post: operations['craftingCancel']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/v1/icons/{kind}/{ns}/{path}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /**
-     * 预烘焙物品/流体图标 PNG（无鉴权，供 img）
-     * @description 从服务端游戏根目录 `aeKeyResources/{kind}/{ns}_{path}.png` 读取。
-     *     须先在单人世界执行 `/ae2lanuis resources render` 并上传资源目录；缺失返回 404。
-     */
-    get: operations['itemIcon']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    /** 图标存在性（预烘焙文件） */
-    head: operations['itemIconHead']
-    patch?: never
-    trace?: never
-  }
+    "/api/v1/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 健康检查与 WebSocket 发现 */
+        get: operations["health"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 登录 */
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 注销（Bearer，幂等） */
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 会话探测 */
+        get: operations["session"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/bindings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 管理员查看全部绑定端点与在线状态（需 OP）
+         * @description 要求当前会话玩家达到 `auth.adminPermissionLevel`（默认 2，与原版 OP/gamemaster 一致）。
+         *     返回每位已设密玩家的终端端点摘要、玩家是否在线、AE 网络是否可解析/通电。
+         */
+        get: operations["adminListBindings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/session/act-as": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 管理员切入目标玩家绑定（进入其用户端网络） */
+        post: operations["adminActAs"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/session/clear-act-as": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 退出切入，回到管理员本人绑定 */
+        post: operations["adminClearActAs"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 审计日志分页（需 OP） */
+        get: operations["adminAudit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** ME 库存分页 */
+        get: operations["listItems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patterns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** ME 已安装样板分页 */
+        get: operations["listPatterns"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pattern-providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 样板供应器槽位板（含空槽与容量）
+         * @description 返回网络内可枚举的样板供应器及完整槽位（含空槽）。
+         *     Patterns 页主数据源；搜索仍可用 GET /api/v1/patterns。
+         */
+        get: operations["listPatternProviders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patterns/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 移动/重排样板槽位（支持批量，事务性）
+         * @description 在供应器 patternInv 槽位间移动或交换。
+         *     to.slotIndex 省略时填入目标供应器第一个空槽。
+         *     任一条失败则全部回滚。
+         */
+        post: operations["movePatterns"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/encoding/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 编码页状态（空白样板库存等） */
+        get: operations["encodingStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/encoding/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 预览编码结果（匹配配方 / 校验格子） */
+        post: operations["encodingResolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/encoding/stonecutting/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 切石可选配方列表 */
+        post: operations["encodingStonecuttingOptions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/encoding/encode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 编码空白样板并写入供应器空槽
+         * @description 消耗 ME 中 1 张空白样板，编码后写入指定供应器空槽。
+         *     slotIndex 省略则填第一个空槽。写入失败时回滚空白样板。
+         */
+        post: operations["encodingEncode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crafting/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 可合成目录 */
+        get: operations["craftingCatalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crafting/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 合成计划 */
+        post: operations["craftingPlan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crafting/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 提交合成 */
+        post: operations["craftingSubmit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crafting/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 进行中作业 */
+        get: operations["craftingJobs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/crafting/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 取消合成 */
+        post: operations["craftingCancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/icons/{kind}/{ns}/{path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 预烘焙物品/流体图标 PNG（无鉴权，供 img）
+         * @description 从服务端游戏根目录 `aeKeyResources/{kind}/{ns}_{path}.png` 读取。
+         *     须先在单人世界执行 `/ae2lanuis resources render` 并上传资源目录；缺失返回 404。
+         */
+        get: operations["itemIcon"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        /** 图标存在性（预烘焙文件） */
+        head: operations["itemIconHead"];
+        patch?: never;
+        trace?: never;
+    };
 }
-export type webhooks = Record<string, never>
+export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    OkResult: {
-      ok: boolean
-    }
-    ErrorBody: {
-      error?: {
-        code?: string
-        message?: string
-      }
-    }
-    WebsocketInfo: {
-      enabled: boolean
-      /** @description 对外 WS 端口；与 HTTP 相同时表示单端口分流 */
-      port: number
-      pushIntervalMs: number
-      running?: boolean
-      /** @description true 时与 http.port 相同（默认） */
-      sameAsHttp?: boolean
-    }
-    HealthResponse: {
-      ok: boolean
-      /** @description 必须为 ae2lanuis */
-      service: string
-      version: string
-      sessions?: number
-      websocket?: components['schemas']['WebsocketInfo']
-    }
-    LoginRequest: {
-      account: string
-      password: string
-      remember?: boolean
-    }
-    LoginResponse: {
-      ok: boolean
-      account: string
-      token: string
-      displayName: string
-      /** @description 是否达到 Web 管理权限（OP） */
-      admin?: boolean
-    }
-    SessionResponse: {
-      authenticated: boolean
-      account?: string
-      /** @description 已登录时是否为管理员 */
-      admin?: boolean
-      actingAs?: components['schemas']['ActingAsInfo']
-    }
-    ActingAsInfo: {
-      playerUuid: string
-      playerName: string
-    }
-    AdminEndpoint: {
-      terminalItemId?: string
-      dimension?: string
-      playerPos?: string
-    }
-    AdminBinding: {
-      playerUuid: string
-      playerName: string
-      /** @description Unix 秒 */
-      updatedAt: number
-      /** @description 玩家当前是否在服务器内 */
-      playerOnline: boolean
-      hasNetworkLink: boolean
-      endpoint?: components['schemas']['AdminEndpoint']
-      /** @description 能否从保存的链接解析 IGrid */
-      networkAvailable: boolean
-      /** @description AE 网络是否通电 */
-      networkOnline: boolean
-      /** @description 库存种类；轻量探测时可能为 -1 */
-      itemTypes?: number
-      cpuCount?: number
-      busyCpuCount?: number
-    }
-    AdminBindingsResponse: {
-      ok: boolean
-      total: number
-      bindings: components['schemas']['AdminBinding'][]
-    }
-    AuditEntry: {
-      /** @description epoch ms */
-      ts: number
-      action: string
-      actorUuid?: string
-      actorName?: string
-      targetUuid?: string
-      targetName?: string
-      detail?: string
-    }
-    AdminAuditResponse: {
-      ok: boolean
-      page: number
-      pageSize: number
-      total: number
-      entries: components['schemas']['AuditEntry'][]
-    }
-    Item: {
-      key: string
-      id: string
-      displayName: string
-      amount: string
-      craftable: boolean
-      kind?: string
-      /** @deprecated */
-      isFluid?: boolean
-      amountPerUnit?: number
-      /** @description 相对路径，如 /api/v1/icons/item/minecraft/stone；对应预烘焙 PNG */
-      iconUrl?: string
-    }
-    NetworkSummary: {
-      online: boolean
-      itemTypes: number
-      cpuCount: number
-      busyCpuCount: number
-    }
-    PageItem: {
-      page: number
-      pageSize: number
-      total: number
-      items: components['schemas']['Item'][]
-    }
-    ItemsResponse: components['schemas']['PageItem'] & {
-      network: components['schemas']['NetworkSummary']
-      contentRevision?: number
-    }
-    PatternProviderTarget: {
-      name?: string
-      blockId?: string
-      side?: string
-      pos?: {
-        x?: number
-        y?: number
-        z?: number
-        dimension?: string
-      }
-    }
-    PatternProvider: {
-      id?: string
-      name?: string
-      pos?: {
-        [key: string]: unknown
-      }
-      priority?: number
-      /** @description 样板库存槽位数（vanilla Pattern Provider = 9） */
-      slotCount?: number
-      /** @description 已占用槽位数 */
-      usedSlots?: number
-      /** @description 是否支持槽位读写移动（PatternProviderLogic） */
-      movable?: boolean
-      targets?: components['schemas']['PatternProviderTarget'][]
-    }
-    PatternInput: {
-      item?: components['schemas']['Item']
-      multiplier?: string
-      alternatives?: components['schemas']['Item'][]
-    }
-    Pattern: {
-      id?: string
-      name?: string
-      /** @description 工作模式：crafting / processing / smithing / stonecutting / other */
-      mode?: string
-      /** @description 在供应器 patternInv 中的下标 */
-      slotIndex?: number
-      /** @description 编码人（样板物品 NBT 可选字段，无则省略） */
-      encoder?: string
-      /** @description 原版/数据包配方 ID（工作台样板常见） */
-      recipeId?: string
-      /**
-       * @description 有序/无序合成（仅 crafting 模式可能有）
-       * @enum {string}
-       */
-      craftingShape?: 'shaped' | 'shapeless'
-      primaryOutput?: components['schemas']['Item']
-      outputs?: components['schemas']['Item'][]
-      inputs?: components['schemas']['PatternInput'][]
-      substitute?: boolean
-      substituteFluids?: boolean
-      definition?: components['schemas']['Item']
-      provider?: components['schemas']['PatternProvider']
-    }
-    PatternSlot: {
-      index: number
-      pattern?: components['schemas']['Pattern'] | null
-    }
-    PatternProviderBoard: components['schemas']['PatternProvider'] & {
-      slots: components['schemas']['PatternSlot'][]
-    }
-    PatternProvidersResponse: {
-      ok: boolean
-      providers: components['schemas']['PatternProviderBoard'][]
-    }
-    PatternSlotRef: {
-      providerId: string
-      slotIndex: number
-    }
-    PatternMoveTarget: {
-      providerId: string
-      /** @description 省略则填第一个空槽 */
-      slotIndex?: number
-    }
-    PatternMoveOp: {
-      from: components['schemas']['PatternSlotRef']
-      to: components['schemas']['PatternMoveTarget']
-    }
-    PatternMoveRequest: {
-      moves: components['schemas']['PatternMoveOp'][]
-    }
-    PatternsResponse: {
-      page: number
-      pageSize: number
-      total: number
-      items: components['schemas']['Pattern'][]
-    }
-    CraftPlanRequest: {
-      key: string
-      amount: string
-    }
-    CraftPlanCpu: {
-      cpuName?: string
-      busy?: boolean
-      bytesAvailable?: string
-      coProcessors?: number
-      suitable?: boolean
-    }
-    CraftRecipeTreeInput: {
-      item?: components['schemas']['Item']
-      missing?: boolean
-      child?: components['schemas']['CraftRecipeTreeNode']
-    }
-    CraftRecipeTreeNode: {
-      output?: components['schemas']['Item']
-      times?: string
-      mode?: string
-      patternId?: string
-      missing?: boolean
-      inputs?: components['schemas']['CraftRecipeTreeInput'][]
-    }
-    CraftPlanResponse: {
-      planId?: string
-      ok?: boolean
-      canSubmit?: boolean
-      bytes?: string
-      bytesAvailable?: string
-      coProcessors?: number
-      cpuCount?: number
-      idleCpuCount?: number
-      multiplePaths?: boolean
-      usedItems?: components['schemas']['Item'][]
-      tree?: components['schemas']['CraftRecipeTreeNode']
-      cpus?: components['schemas']['CraftPlanCpu'][]
-      warning?: string
-      missing?: components['schemas']['Item'][]
-      output?: components['schemas']['Item']
-    }
-    CraftSubmitRequest: {
-      planId?: string
-      key?: string
-      amount?: string
-      cpuName?: string
-    }
-    CraftSubmitResponse: {
-      [key: string]: unknown
-    }
-    /** @description 与游戏内合成 CPU GUI 同源：CPU 缓冲库存 / 等待回库（制造中）/ 待推送样板产出。 */
-    CraftJobStatusEntry: {
-      item: components['schemas']['Item']
-      /** @description CPU 库存中已有数量 */
-      stored: string
-      /** @description 已发出、等待回库数量 */
-      active: string
-      /** @description 尚未推送的样板产出数量 */
-      pending: string
-    }
-    CraftJob: {
-      cpuName: string
-      busy: boolean
-      status: string
-      detail?: string
-      output?: components['schemas']['Item']
-      progress?: string
-      totalItems?: string
-      progressPercent?: number
-      crafted?: string
-      requested?: string
-      elapsedNanos?: string
-      /** @description 忙碌时合成进度明细（物品行） */
-      entries?: components['schemas']['CraftJobStatusEntry'][]
-    }
-    CraftJobsResponse: {
-      jobs: components['schemas']['CraftJob'][]
-    }
-    CraftCancelRequest: {
-      cpuName: string
-    }
-  }
-  responses: never
-  parameters: {
-    q: string
-    page: number
-    pageSize: number
-  }
-  requestBodies: never
-  headers: never
-  pathItems: never
+    schemas: {
+        OkResult: {
+            ok: boolean;
+        };
+        ErrorBody: {
+            error?: {
+                code?: string;
+                message?: string;
+            };
+        };
+        WebsocketInfo: {
+            enabled: boolean;
+            /** @description 对外 WS 端口；与 HTTP 相同时表示单端口分流 */
+            port: number;
+            pushIntervalMs: number;
+            running?: boolean;
+            /** @description true 时与 http.port 相同（默认） */
+            sameAsHttp?: boolean;
+        };
+        HealthResponse: {
+            ok: boolean;
+            /** @description 必须为 ae2lanuis */
+            service: string;
+            version: string;
+            sessions?: number;
+            websocket?: components["schemas"]["WebsocketInfo"];
+        };
+        LoginRequest: {
+            account: string;
+            password: string;
+            remember?: boolean;
+        };
+        LoginResponse: {
+            ok: boolean;
+            account: string;
+            token: string;
+            displayName: string;
+            /** @description 是否达到 Web 管理权限（OP） */
+            admin?: boolean;
+        };
+        SessionResponse: {
+            authenticated: boolean;
+            account?: string;
+            /** @description 已登录时是否为管理员 */
+            admin?: boolean;
+            actingAs?: components["schemas"]["ActingAsInfo"];
+        };
+        ActingAsInfo: {
+            playerUuid: string;
+            playerName: string;
+        };
+        AdminEndpoint: {
+            terminalItemId?: string;
+            dimension?: string;
+            playerPos?: string;
+        };
+        AdminBinding: {
+            playerUuid: string;
+            playerName: string;
+            /** @description Unix 秒 */
+            updatedAt: number;
+            /** @description 玩家当前是否在服务器内 */
+            playerOnline: boolean;
+            hasNetworkLink: boolean;
+            endpoint?: components["schemas"]["AdminEndpoint"];
+            /** @description 能否从保存的链接解析 IGrid */
+            networkAvailable: boolean;
+            /** @description AE 网络是否通电 */
+            networkOnline: boolean;
+            /** @description 库存种类；轻量探测时可能为 -1 */
+            itemTypes?: number;
+            cpuCount?: number;
+            busyCpuCount?: number;
+        };
+        AdminBindingsResponse: {
+            ok: boolean;
+            total: number;
+            bindings: components["schemas"]["AdminBinding"][];
+        };
+        AuditEntry: {
+            /** @description epoch ms */
+            ts: number;
+            action: string;
+            actorUuid?: string;
+            actorName?: string;
+            targetUuid?: string;
+            targetName?: string;
+            detail?: string;
+        };
+        AdminAuditResponse: {
+            ok: boolean;
+            page: number;
+            pageSize: number;
+            total: number;
+            entries: components["schemas"]["AuditEntry"][];
+        };
+        Item: {
+            key: string;
+            id: string;
+            displayName: string;
+            amount: string;
+            craftable: boolean;
+            /** @description item / fluid / other */
+            kind?: string;
+            amountPerUnit?: number;
+            /** @description 相对路径，如 /api/v1/icons/item/minecraft/stone；对应预烘焙 PNG */
+            iconUrl?: string;
+            /** @description 需求总数（计划 used+missing） */
+            total?: string;
+            /** @description ME 库存数量 */
+            stock?: string;
+            /** @description 仍需合成/补齐数量 max(0, total-stock) */
+            toCraft?: string;
+        };
+        NetworkSummary: {
+            online: boolean;
+            itemTypes: number;
+            cpuCount: number;
+            busyCpuCount: number;
+        };
+        PageItem: {
+            page: number;
+            pageSize: number;
+            total: number;
+            items: components["schemas"]["Item"][];
+        };
+        ItemsResponse: components["schemas"]["PageItem"] & {
+            network: components["schemas"]["NetworkSummary"];
+            contentRevision?: number;
+        };
+        PatternProviderTarget: {
+            name?: string;
+            blockId?: string;
+            side?: string;
+            pos?: {
+                x?: number;
+                y?: number;
+                z?: number;
+                dimension?: string;
+            };
+        };
+        PatternProvider: {
+            id?: string;
+            name?: string;
+            pos?: {
+                [key: string]: unknown;
+            };
+            priority?: number;
+            /** @description 样板库存槽位数（vanilla Pattern Provider = 9） */
+            slotCount?: number;
+            /** @description 已占用槽位数 */
+            usedSlots?: number;
+            /** @description 是否支持槽位读写移动（PatternProviderLogic） */
+            movable?: boolean;
+            targets?: components["schemas"]["PatternProviderTarget"][];
+        };
+        PatternInput: {
+            item?: components["schemas"]["Item"];
+            multiplier?: string;
+            alternatives?: components["schemas"]["Item"][];
+        };
+        Pattern: {
+            id?: string;
+            name?: string;
+            /** @description 工作模式：crafting / processing / smithing / stonecutting / other */
+            mode?: string;
+            /** @description 在供应器 patternInv 中的下标 */
+            slotIndex?: number;
+            /** @description 编码人（样板物品 NBT 可选字段，无则省略） */
+            encoder?: string;
+            /** @description 原版/数据包配方 ID（工作台样板常见） */
+            recipeId?: string;
+            /**
+             * @description 有序/无序合成（仅 crafting 模式可能有）
+             * @enum {string}
+             */
+            craftingShape?: "shaped" | "shapeless";
+            primaryOutput?: components["schemas"]["Item"];
+            outputs?: components["schemas"]["Item"][];
+            inputs?: components["schemas"]["PatternInput"][];
+            substitute?: boolean;
+            substituteFluids?: boolean;
+            definition?: components["schemas"]["Item"];
+            provider?: components["schemas"]["PatternProvider"];
+        };
+        PatternSlot: {
+            index: number;
+            pattern?: components["schemas"]["Pattern"] | null;
+        };
+        PatternProviderBoard: components["schemas"]["PatternProvider"] & {
+            slots: components["schemas"]["PatternSlot"][];
+        };
+        PatternProvidersResponse: {
+            ok: boolean;
+            providers: components["schemas"]["PatternProviderBoard"][];
+        };
+        PatternSlotRef: {
+            providerId: string;
+            slotIndex: number;
+        };
+        PatternMoveTarget: {
+            providerId: string;
+            /** @description 省略则填第一个空槽 */
+            slotIndex?: number;
+        };
+        PatternMoveOp: {
+            from: components["schemas"]["PatternSlotRef"];
+            to: components["schemas"]["PatternMoveTarget"];
+        };
+        PatternMoveRequest: {
+            moves: components["schemas"]["PatternMoveOp"][];
+        };
+        PatternsResponse: {
+            page: number;
+            pageSize: number;
+            total: number;
+            items: components["schemas"]["Pattern"][];
+        };
+        CraftPlanRequest: {
+            key: string;
+            amount: string;
+        };
+        CraftPlanCpu: {
+            cpuName?: string;
+            busy?: boolean;
+            bytesAvailable?: string;
+            coProcessors?: number;
+            suitable?: boolean;
+        };
+        CraftRecipeTreeInput: {
+            item?: components["schemas"]["Item"];
+            missing?: boolean;
+            child?: components["schemas"]["CraftRecipeTreeNode"];
+        };
+        CraftRecipeTreeNode: {
+            output?: components["schemas"]["Item"];
+            times?: string;
+            mode?: string;
+            patternId?: string;
+            missing?: boolean;
+            inputs?: components["schemas"]["CraftRecipeTreeInput"][];
+        };
+        CraftPlanResponse: {
+            planId?: string;
+            ok?: boolean;
+            canSubmit?: boolean;
+            bytes?: string;
+            bytesAvailable?: string;
+            coProcessors?: number;
+            cpuCount?: number;
+            idleCpuCount?: number;
+            multiplePaths?: boolean;
+            usedItems?: components["schemas"]["Item"][];
+            tree?: components["schemas"]["CraftRecipeTreeNode"];
+            cpus?: components["schemas"]["CraftPlanCpu"][];
+            warning?: string;
+            missing?: components["schemas"]["Item"][];
+            output?: components["schemas"]["Item"];
+        };
+        CraftSubmitRequest: {
+            planId?: string;
+            key?: string;
+            amount?: string;
+            cpuName?: string;
+        };
+        CraftSubmitResponse: {
+            [key: string]: unknown;
+        };
+        /** @description 与游戏内合成 CPU GUI 同源：CPU 缓冲库存 / 等待回库（制造中）/ 待推送样板产出。 */
+        CraftJobStatusEntry: {
+            item: components["schemas"]["Item"];
+            /** @description CPU 库存中已有数量 */
+            stored: string;
+            /** @description 已发出、等待回库数量 */
+            active: string;
+            /** @description 尚未推送的样板产出数量 */
+            pending: string;
+        };
+        CraftJob: {
+            cpuName: string;
+            busy: boolean;
+            status: string;
+            detail?: string;
+            output?: components["schemas"]["Item"];
+            progress?: string;
+            totalItems?: string;
+            progressPercent?: number;
+            crafted?: string;
+            requested?: string;
+            elapsedNanos?: string;
+            /** @description 忙碌时合成进度明细（物品行） */
+            entries?: components["schemas"]["CraftJobStatusEntry"][];
+        };
+        CraftJobsResponse: {
+            jobs: components["schemas"]["CraftJob"][];
+        };
+        CraftCancelRequest: {
+            cpuName: string;
+        };
+        /** @description 编码格子引用；key 优先（如 item:minecraft:stone），否则 id */
+        EncodingSlot: {
+            key?: string;
+            id?: string;
+            /** @description 缺省 1 */
+            amount?: string;
+            /** @description 稀疏下标；crafting 0–8 */
+            index?: number;
+        };
+        EncodingStatusResponse: {
+            ok: boolean;
+            /** @description ME 中空白样板数量 */
+            blankPatterns: string;
+            /** @description 各模式是否可用，如 crafting/processing/smithing/stonecutting */
+            modes: {
+                [key: string]: boolean;
+            };
+        };
+        EncodingResolveRequest: {
+            /** @enum {string} */
+            mode: "crafting" | "processing" | "smithing" | "stonecutting";
+            inputs?: components["schemas"]["EncodingSlot"][];
+            outputs?: components["schemas"]["EncodingSlot"][];
+            substitute?: boolean;
+            substituteFluids?: boolean;
+            /** @description 切石/锻造等已选配方 */
+            recipeId?: string;
+        };
+        EncodingResolveResponse: {
+            ok: boolean;
+            canEncode: boolean;
+            recipeId?: string;
+            /** @enum {string} */
+            craftingShape?: "shaped" | "shapeless";
+            primaryOutput?: components["schemas"]["Item"];
+            outputs?: components["schemas"]["Item"][];
+            warning?: string;
+        };
+        EncodingStonecuttingOptionsRequest: {
+            input: components["schemas"]["EncodingSlot"];
+        };
+        EncodingStonecuttingOption: {
+            recipeId: string;
+            output: components["schemas"]["Item"];
+        };
+        EncodingStonecuttingOptionsResponse: {
+            ok: boolean;
+            options: components["schemas"]["EncodingStonecuttingOption"][];
+        };
+        EncodingEncodeRequest: {
+            /** @enum {string} */
+            mode: "crafting" | "processing" | "smithing" | "stonecutting";
+            inputs?: components["schemas"]["EncodingSlot"][];
+            outputs?: components["schemas"]["EncodingSlot"][];
+            substitute?: boolean;
+            substituteFluids?: boolean;
+            recipeId?: string;
+            providerId: string;
+            /** @description 省略则首个空槽 */
+            slotIndex?: number;
+        };
+        EncodingEncodeResponse: {
+            ok: boolean;
+            providerId: string;
+            slotIndex: number;
+            pattern?: components["schemas"]["Pattern"];
+            message?: string;
+            code?: string;
+        };
+    };
+    responses: never;
+    parameters: {
+        q: string;
+        page: number;
+        pageSize: number;
+    };
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
-export type $defs = Record<string, never>
+export type $defs = Record<string, never>;
 export interface operations {
-  health: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HealthResponse']
-        }
-      }
-    }
-  }
-  login: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['LoginRequest']
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['LoginResponse']
-        }
-      }
-    }
-  }
-  logout: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['OkResult']
-        }
-      }
-    }
-  }
-  session: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['SessionResponse']
-        }
-      }
-    }
-  }
-  adminListBindings: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['AdminBindingsResponse']
-        }
-      }
-      /** @description 未登录 */
-      401: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description 非管理员 */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  adminActAs: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': {
-          /** Format: uuid */
-          playerUuid: string
-        }
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['SessionResponse']
-        }
-      }
-      /** @description 非管理员 */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description 网络不可达或离线 */
-      503: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  adminClearActAs: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['OkResult']
-        }
-      }
-    }
-  }
-  adminAudit: {
-    parameters: {
-      query?: {
-        q?: components['parameters']['q']
-        page?: components['parameters']['page']
-        pageSize?: components['parameters']['pageSize']
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['AdminAuditResponse']
-        }
-      }
-      /** @description 非管理员 */
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  listItems: {
-    parameters: {
-      query?: {
-        q?: components['parameters']['q']
-        kind?: 'all' | 'item' | 'fluid' | 'other'
-        filter?: 'all' | 'stocked' | 'craftable'
-        sort?: 'name' | 'amount' | 'mod'
-        order?: 'asc' | 'desc'
-        page?: components['parameters']['page']
-        pageSize?: components['parameters']['pageSize']
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ItemsResponse']
-        }
-      }
-    }
-  }
-  listPatterns: {
-    parameters: {
-      query?: {
-        q?: components['parameters']['q']
-        qOutput?: string
-        qInput?: string
-        mode?: string
-        page?: components['parameters']['page']
-        pageSize?: components['parameters']['pageSize']
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['PatternsResponse']
-        }
-      }
-    }
-  }
-  listPatternProviders: {
-    parameters: {
-      query?: {
-        q?: components['parameters']['q']
-        qOutput?: string
-        qInput?: string
-        mode?: string
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['PatternProvidersResponse']
-        }
-      }
-    }
-  }
-  movePatterns: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['PatternMoveRequest']
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['OkResult']
-        }
-      }
-      /** @description 校验失败（槽空/目标满/供应器不存在等） */
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ErrorBody']
-        }
-      }
-    }
-  }
-  craftingCatalog: {
-    parameters: {
-      query?: {
-        q?: components['parameters']['q']
-        sort?: string
-        page?: components['parameters']['page']
-        pageSize?: components['parameters']['pageSize']
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['PageItem']
-        }
-      }
-    }
-  }
-  craftingPlan: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CraftPlanRequest']
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['CraftPlanResponse']
-        }
-      }
-    }
-  }
-  craftingSubmit: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CraftSubmitRequest']
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['CraftSubmitResponse']
-        }
-      }
-    }
-  }
-  craftingJobs: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['CraftJobsResponse']
-        }
-      }
-    }
-  }
-  craftingCancel: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CraftCancelRequest']
-      }
-    }
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['OkResult']
-        }
-      }
-    }
-  }
-  itemIcon: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        kind: 'item' | 'fluid'
-        ns: string
-        path: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description PNG 字节 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'image/png': unknown
-        }
-      }
-      /** @description 预烘焙文件不存在 */
-      404: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
-  itemIconHead: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        kind: 'item' | 'fluid'
-        ns: string
-        path: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description 存在 */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-      /** @description 不存在 */
-      404: {
-        headers: {
-          [name: string]: unknown
-        }
-        content?: never
-      }
-    }
-  }
+    health: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkResult"];
+                };
+            };
+        };
+    };
+    session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
+                };
+            };
+        };
+    };
+    adminListBindings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminBindingsResponse"];
+                };
+            };
+            /** @description 未登录 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 非管理员 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    adminActAs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    playerUuid: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
+                };
+            };
+            /** @description 非管理员 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 网络不可达或离线 */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    adminClearActAs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkResult"];
+                };
+            };
+        };
+    };
+    adminAudit: {
+        parameters: {
+            query?: {
+                q?: components["parameters"]["q"];
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAuditResponse"];
+                };
+            };
+            /** @description 非管理员 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listItems: {
+        parameters: {
+            query?: {
+                q?: components["parameters"]["q"];
+                kind?: "all" | "item" | "fluid" | "other";
+                filter?: "all" | "stocked" | "craftable";
+                sort?: "name" | "amount" | "mod";
+                order?: "asc" | "desc";
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemsResponse"];
+                };
+            };
+        };
+    };
+    listPatterns: {
+        parameters: {
+            query?: {
+                qOutput?: string;
+                qInput?: string;
+                mode?: string;
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatternsResponse"];
+                };
+            };
+        };
+    };
+    listPatternProviders: {
+        parameters: {
+            query?: {
+                qOutput?: string;
+                qInput?: string;
+                mode?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatternProvidersResponse"];
+                };
+            };
+        };
+    };
+    movePatterns: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatternMoveRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkResult"];
+                };
+            };
+            /** @description 校验失败（槽空/目标满/供应器不存在等） */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    encodingStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EncodingStatusResponse"];
+                };
+            };
+        };
+    };
+    encodingResolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EncodingResolveRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EncodingResolveResponse"];
+                };
+            };
+        };
+    };
+    encodingStonecuttingOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EncodingStonecuttingOptionsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EncodingStonecuttingOptionsResponse"];
+                };
+            };
+        };
+    };
+    encodingEncode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EncodingEncodeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EncodingEncodeResponse"];
+                };
+            };
+            /** @description 校验失败 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
+    craftingCatalog: {
+        parameters: {
+            query?: {
+                q?: components["parameters"]["q"];
+                sort?: string;
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageItem"];
+                };
+            };
+        };
+    };
+    craftingPlan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CraftPlanRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CraftPlanResponse"];
+                };
+            };
+        };
+    };
+    craftingSubmit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CraftSubmitRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CraftSubmitResponse"];
+                };
+            };
+        };
+    };
+    craftingJobs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CraftJobsResponse"];
+                };
+            };
+        };
+    };
+    craftingCancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CraftCancelRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkResult"];
+                };
+            };
+        };
+    };
+    itemIcon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: "item" | "fluid";
+                ns: string;
+                path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PNG 字节 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": unknown;
+                };
+            };
+            /** @description 预烘焙文件不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    itemIconHead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: "item" | "fluid";
+                ns: string;
+                path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 存在 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
 }

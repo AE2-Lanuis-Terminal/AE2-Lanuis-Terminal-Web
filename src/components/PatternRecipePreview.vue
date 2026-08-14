@@ -5,7 +5,7 @@
 import { useI18n } from 'vue-i18n'
 import { ArrowRight } from '@lucide/vue'
 import type { Item, PatternInput } from '@/types'
-import PatternItemSlot from './PatternItemSlot.vue'
+import ItemSlot from './ItemSlot.vue'
 
 defineProps<{
   inputs: PatternInput[]
@@ -23,10 +23,10 @@ const sepWrap = 'shrink-0 self-center'
     <div class="relative z-[1] flex flex-wrap items-start gap-x-2 gap-y-2.5">
       <template v-for="(inp, idx) in inputs" :key="`in-${idx}-${inp.item.key}`">
         <div class="inline-flex flex-col items-center gap-1.5">
-          <PatternItemSlot :item="inp.item" :size="30" />
+          <ItemSlot :item="inp.item" :size="30" tip />
           <div v-if="inp.alternatives?.length" class="flex max-w-[8rem] flex-wrap items-center justify-center gap-1" :aria-label="t('patterns.alternatives')">
-            <span class="ui-me-recipe-sep px-1 text-[9px]">{{ t('patterns.or') }}</span>
-            <PatternItemSlot v-for="alt in inp.alternatives" :key="alt.key" :item="alt" :size="16" amount="" variant="alt" />
+            <span class="ui-me-recipe-sep px-1 text-[0.56rem]">{{ t('patterns.or') }}</span>
+            <ItemSlot v-for="alt in inp.alternatives" :key="alt.key" :item="alt" :size="16" amount="" variant="alt" tip />
           </div>
         </div>
         <span v-if="idx < inputs.length - 1" :class="sepWrap" aria-hidden="true">
@@ -41,7 +41,7 @@ const sepWrap = 'shrink-0 self-center'
       </span>
 
       <template v-for="(out, idx) in outputs" :key="`out-${idx}-${out.key}`">
-        <PatternItemSlot :item="out" :size="30" variant="output" />
+        <ItemSlot :item="out" :size="30" variant="output" tip />
         <span v-if="idx < outputs.length - 1" :class="sepWrap" aria-hidden="true">
           <span class="ui-me-recipe-sep">+</span>
         </span>

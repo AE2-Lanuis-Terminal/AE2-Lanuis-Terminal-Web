@@ -9,7 +9,7 @@ import { touchAwareSize } from './utils'
 
 const props = withDefaults(
   defineProps<{
-    variant?: ButtonVariants['variant'] | 'primary' | 'ghost-quiet'
+    variant?: ButtonVariants['variant'] | 'primary' | 'ghost-quiet' | 'danger'
     size?: ButtonVariants['size']
     class?: HTMLAttributes['class']
     type?: 'button' | 'submit' | 'reset'
@@ -26,7 +26,7 @@ const props = withDefaults(
 )
 
 const resolvedVariant = (): ButtonVariants['variant'] => {
-  if (props.variant === 'primary') return 'default'
+  if (props.variant === 'primary' || props.variant === 'danger') return 'default'
   if (props.variant === 'ghost-quiet') return 'ghost'
   return props.variant ?? 'outline'
 }
@@ -46,6 +46,8 @@ const resolvedVariant = (): ButtonVariants['variant'] => {
           'text-muted transition-[background-color,color,box-shadow] duration-200 hover:bg-[var(--glass-hover-bg)] hover:text-ink hover:shadow-[var(--glass-hover-glow)]',
         variant === 'primary' &&
           'border-cyan/40 bg-[linear-gradient(180deg,#1a6f88_0%,#14586c_100%)] text-[#effbff] shadow-[inset_0_1px_0_color-mix(in_srgb,#fff_28%,transparent)] transition-[filter,box-shadow] duration-200 hover:brightness-110 hover:shadow-[0_4px_14px_color-mix(in_srgb,#0b3a48_30%,transparent),var(--glass-hover-glow)]',
+        variant === 'danger' &&
+          'border-red/45 bg-[linear-gradient(180deg,#b03a3a_0%,#8a2a2a_100%)] text-[#fff4f4] shadow-[inset_0_1px_0_color-mix(in_srgb,#fff_22%,transparent)] transition-[filter,box-shadow] duration-200 hover:brightness-110 hover:shadow-[0_4px_14px_color-mix(in_srgb,#5a1818_35%,transparent),var(--glass-hover-glow)]',
         block && 'w-full',
         props.class,
       )

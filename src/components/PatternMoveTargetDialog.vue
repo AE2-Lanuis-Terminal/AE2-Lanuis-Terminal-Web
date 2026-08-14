@@ -59,11 +59,11 @@ function confirm() {
 <template>
   <AppDialog :open="open" class="min-w-[18rem] max-w-[min(100%-1.5rem,24rem)] sm:max-w-[24rem]" @update:open="onOpen">
     <template #header>
-      <h2 class="m-0 text-[13px] font-semibold tracking-[-0.02em]">{{ t('patterns.moveTitle') }}</h2>
-      <p class="m-0 mt-1 text-[12px] text-muted">{{ t('patterns.moveHint') }}</p>
+      <h2 class="m-0 text-[0.81rem] font-semibold tracking-[-0.02em]">{{ t('patterns.moveTitle') }}</h2>
+      <p class="m-0 mt-1 text-[0.75rem] text-muted">{{ t('patterns.moveHint') }}</p>
     </template>
 
-    <p class="m-0 text-[12px] text-muted">{{ t('patterns.selectedCount', { n: selectedCount }) }}</p>
+    <p class="m-0 text-[0.75rem] text-muted">{{ t('patterns.selectedCount', { n: selectedCount }) }}</p>
     <div class="mt-2 grid max-h-[40vh] gap-1.5 overflow-auto">
       <button
         v-for="p in candidates"
@@ -75,12 +75,12 @@ function confirm() {
         @click="picked = p.id"
       >
         <span class="min-w-0">
-          <strong class="block truncate text-[12.5px]"><McFormattedText :text="p.name" /></strong>
-          <span class="mono text-[10px] text-muted">{{ p.id }}</span>
+          <strong class="block truncate text-[0.78rem]"><McFormattedText :text="p.name" /></strong>
+          <span class="mono text-[0.63rem] text-muted">{{ p.id }}</span>
         </span>
-        <span class="mono shrink-0 text-[11px] text-cyan">{{ t('patterns.moveFree', { n: p.free }) }}</span>
+        <span class="mono shrink-0 text-[0.69rem] text-cyan">{{ t('patterns.moveFree', { n: p.free }) }}</span>
       </button>
-      <p v-if="!candidates.length" class="m-0 text-[12px] text-muted">{{ t('patterns.empty') }}</p>
+      <p v-if="!candidates.length" class="m-0 text-[0.75rem] text-muted">{{ t('patterns.empty') }}</p>
     </div>
 
     <template #footer>

@@ -39,7 +39,7 @@ const pulseOn = computed(() => props.pulse && animationsEnabled.value)
 /* ME 控制器视觉表面 / Logo 局部样式 */
 .me-logo {
   /* CSS 变量 --me-size */
-  --me-size: 36px;
+  --me-size: 2.25rem;
   /* CSS 变量 --me-metal */
   --me-metal: #1c2129;
   /* CSS 变量 --me-metal-hi */
@@ -67,17 +67,17 @@ const pulseOn = computed(() => props.pulse && animationsEnabled.value)
 /* ME 控制器视觉表面 / Logo 局部样式 */
 .me-logo--sm {
   /* CSS 变量 --me-size */
-  --me-size: 28px;
+  --me-size: 1.75rem;
 }
 /* ME 控制器视觉表面 / Logo 局部样式 */
 .me-logo--md {
   /* CSS 变量 --me-size */
-  --me-size: 36px;
+  --me-size: 2.25rem;
 }
 /* ME 控制器视觉表面 / Logo 局部样式 */
 .me-logo--lg {
   /* CSS 变量 --me-size */
-  --me-size: 48px;
+  --me-size: 3rem;
 }
 
 /* ME 控制器视觉表面 / Logo 局部样式 */
@@ -111,10 +111,9 @@ const pulseOn = computed(() => props.pulse && animationsEnabled.value)
   /* 圆角 */
   border-radius: 2px;
   /* 背景图（网格/光晕等） */
-  background-image:
-    /* 样式声明 */
-    linear-gradient(/* 样式声明 */ to right, /* 样式声明 */ color-mix(in srgb, var(--me-edge) 55%, transparent) 1px, /* 样式声明 */ transparent 1px /* 样式细节 */),
-    /* 样式声明 */ linear-gradient(/* 样式声明 */ to bottom, /* 样式声明 */ color-mix(in srgb, var(--me-edge) 55%, transparent) 1px, /* 样式声明 */ transparent 1px /* 样式细节 */);
+  background-image: /* 样式声明 */
+    linear-gradient(/* 样式声明 */ to right, /* 样式声明 */ color-mix(in srgb, var(--me-edge) 55%, transparent) 0.06rem, /* 样式声明 */ transparent 0.06rem /* 样式细节 */),
+    /* 样式声明 */ linear-gradient(/* 样式声明 */ to bottom, /* 样式声明 */ color-mix(in srgb, var(--me-edge) 55%, transparent) 0.06rem, /* 样式声明 */ transparent 0.06rem /* 样式细节 */);
   /* 背景尺寸 */
   background-size: 25% 25%;
   /* 不透明度 */

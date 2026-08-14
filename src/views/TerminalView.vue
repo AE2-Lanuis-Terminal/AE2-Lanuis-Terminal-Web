@@ -10,7 +10,6 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useRealtimeStore } from '../stores/realtime'
 import ConnectionPanel from '../components/ConnectionPanel.vue'
-import ComingSoonPanel from '../components/ComingSoonPanel.vue'
 import MeControllerLogo from '../components/MeControllerLogo.vue'
 import NetworkStatusChip from '../components/NetworkStatusChip.vue'
 import RainbowTitle from '../components/RainbowTitle.vue'
@@ -25,6 +24,7 @@ import { useCraftJobsStore } from '../stores/craftJobs'
 const StoragePanel = defineAsyncComponent(() => import('../components/StoragePanel.vue'))
 const JobsPanel = defineAsyncComponent(() => import('../components/JobsPanel.vue'))
 const PatternsPanel = defineAsyncComponent(() => import('../components/PatternsPanel.vue'))
+const EncodingPanel = defineAsyncComponent(() => import('../components/EncodingPanel.vue'))
 const CraftJobsDock = defineAsyncComponent(() => import('../components/CraftJobsDock.vue'))
 
 const { t } = useI18n()
@@ -161,7 +161,7 @@ watch(actingAs, () => {
       </div>
     </header>
 
-    <div v-if="actingAs" class="flex shrink-0 items-center justify-between gap-2 border-b border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-[12.5px]">
+    <div v-if="actingAs" class="flex shrink-0 items-center justify-between gap-2 border-b border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-[0.78rem]">
       <span>{{ t('admin.actingAs', { name: actingAs.playerName || actingAs.playerUuid }) }}</span>
       <button type="button" class="ui-btn !h-7" @click="returnToAdmin">
         {{ t('admin.backToAdmin') }}
@@ -188,13 +188,13 @@ watch(actingAs, () => {
         </div>
       </nav>
 
-      <main class="flex min-h-0 min-w-[320px] flex-1 flex-col overflow-hidden px-4 py-3">
+      <main class="flex min-h-0 min-w-[20rem] flex-1 flex-col overflow-hidden px-4 py-3">
         <Transition name="ui-view-fade" mode="out-in">
           <StoragePanel v-if="tab === 'storage' && authenticated && !pendingModeChoice" :key="tab" @network="network = $event" />
           <JobsPanel v-else-if="tab === 'jobs' && authenticated && !pendingModeChoice" :key="tab" />
           <PatternsPanel v-else-if="tab === 'patterns' && authenticated && !pendingModeChoice" :key="tab" />
-          <ComingSoonPanel v-else-if="tab === 'encoding' && authenticated && !pendingModeChoice" :key="tab" title-key="tabs.encoding" />
-          <div v-else :key="'idle'" class="flex min-h-[200px] items-center justify-center py-10 text-center text-[13px] text-muted">
+          <EncodingPanel v-else-if="tab === 'encoding' && authenticated && !pendingModeChoice" :key="tab" />
+          <div v-else :key="'idle'" class="flex min-h-[12.5rem] items-center justify-center py-10 text-center text-[0.81rem] text-muted">
             {{ pendingModeChoice ? t('mode.waiting') : t('status.notConnected') }}
           </div>
         </Transition>

@@ -38,4 +38,16 @@ export type {
   PatternsQuery,
   PatternsResponse,
 } from './patterns'
+export type {
+  EncodingMode,
+  EncodingSlot,
+  EncodingStatusResponse,
+  EncodingResolveRequest,
+  EncodingResolveResponse,
+  EncodingStonecuttingOptionsRequest,
+  EncodingStonecuttingOption,
+  EncodingStonecuttingOptionsResponse,
+  EncodingEncodeRequest,
+  EncodingEncodeResponse,
+} from './encoding'
 export type { paths as OpenApiPaths, components as OpenApiComponents } from './generated'

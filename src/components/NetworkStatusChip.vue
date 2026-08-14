@@ -104,7 +104,7 @@ onUnmounted(() => {
   <div ref="root" class="relative min-w-0" data-tauri-drag-region-exclude>
     <button
       type="button"
-      class="mono inline-flex h-7 max-w-full items-center gap-1.5 rounded-[var(--app-radius-md)] px-1.5 text-[11px] transition-colors hover:bg-[color-mix(in_srgb,var(--color-cyan-dim)_14%,transparent)]"
+      class="mono inline-flex h-7 max-w-full items-center gap-1.5 rounded-[var(--app-radius-md)] px-1.5 text-[0.69rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-cyan-dim)_14%,transparent)]"
       :aria-expanded="open"
       :aria-label="t('status.details')"
       @click="toggle"
@@ -130,10 +130,10 @@ onUnmounted(() => {
         <div class="flex items-start gap-2 border-b border-line px-3 py-2">
           <span class="mt-1 size-2.5 shrink-0 rounded-[3px]" :class="headerConnected ? 'bg-green shadow-[0_0_6px_#6fd992]' : 'bg-amber'" aria-hidden="true" />
           <div class="min-w-0 flex-1">
-            <strong class="block truncate text-[12px] font-semibold tracking-[-0.01em]">
+            <strong class="block truncate text-[0.75rem] font-semibold tracking-[-0.01em]">
               {{ headerConnected ? t('status.liveConnected') : t('status.liveIdle') }}
             </strong>
-            <p class="mono m-0 mt-0.5 truncate text-[10px] text-muted">
+            <p class="mono m-0 mt-0.5 truncate text-[0.63rem] text-muted">
               {{ t('status.items', { count: network.itemTypes }) }}
               <span class="mx-1 text-line">·</span>
               {{ t('status.cpu', { busy: network.busyCpuCount, total: network.cpuCount }) }}
@@ -149,7 +149,7 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <dl class="m-0 px-3 py-1 text-[11px]">
+        <dl class="m-0 px-3 py-1 text-[0.69rem]">
           <div class="flex items-center justify-between gap-3 border-b border-line/70 py-1.5">
             <dt class="m-0 text-muted">{{ t('status.wsLabel') }}</dt>
             <dd class="mono m-0 text-ink" :class="live ? 'text-green' : undefined">{{ wsStateLabel }}</dd>
@@ -181,7 +181,7 @@ onUnmounted(() => {
         </dl>
 
         <div class="border-t border-line p-2">
-          <button type="button" class="ui-btn flex h-8 w-full items-center justify-center gap-1.5 text-[12px]" @click="onReconnect">
+          <button type="button" class="ui-btn flex h-8 w-full items-center justify-center gap-1.5 text-[0.75rem]" @click="onReconnect">
             <RefreshCwIcon class="size-3.5" aria-hidden="true" />
             {{ t('status.reconnect') }}
           </button>

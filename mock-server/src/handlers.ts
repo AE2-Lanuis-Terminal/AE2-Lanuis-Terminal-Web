@@ -3,7 +3,7 @@
  * 登录：任意非空账号密码；账号为 `admin`（不区分大小写）时带 OP。
  */
 import { MOCK_VERSION, mockCatalog, mockItems, mockJobs } from './data.ts'
-import { listPatternsFlat, listProviderBoards, movePatterns } from './patternBoards.ts'
+import { listPatternsFlat, listProviderBoards, movePatterns, insertEncodedPattern } from './patternBoards.ts'
 import { matchesKindFilter, modIdOf, resolveItemKind } from './itemKind.ts'
 import { pinCraftingToFront } from './pinCrafting.ts'
 import type { AdminBinding, AuditEntry, CraftJob, CraftRecipeTreeNode, Item, Pattern, SessionRecord } from './types.ts'
@@ -48,6 +48,8 @@ let jobsState: CraftJob[] = mockJobs.map((j) => ({
 /** cpuName → 模拟起止，不写入 API 响应 */
 const jobMockTiming = new Map<string, { startedAt: number; durationMs: number }>()
 const auditLog: AuditEntry[] = []
+/** mock 空白样板库存 */
+let blankPatternStock = 64
 
 const MOCK_BINDINGS: AdminBinding[] = [
   {
@@ -212,9 +214,15 @@ function activateMockJob(job: CraftJob, item: Item, amount: string) {
 }
 
 function parsePath(url: string): { pathname: string; search: URLSearchParams } {
-  const q = url.includes('?') ? url.slice(url.indexOf('?')) : ''
-  const pathname = (url.split('?')[0] || '').replace(/\/$/, '') || '/'
-  return { pathname, search: new URLSearchParams(q.startsWith('?') ? q.slice(1) : q) }
+  try {
+    const u = url.includes('://') ? new URL(url) : new URL(url, 'http://local.invalid')
+    const pathname = (u.pathname.replace(/\/$/, '') || '/') as string
+    return { pathname, search: u.searchParams }
+  } catch {
+    const q = url.includes('?') ? url.slice(url.indexOf('?')) : ''
+    const pathname = (url.split('?')[0] || '').replace(/\/$/, '') || '/'
+    return { pathname, search: new URLSearchParams(q.startsWith('?') ? q.slice(1) : q) }
+  }
 }
 
 function readBearer(headers?: Record<string, string>): string {
@@ -308,8 +316,7 @@ function patternInputHay(p: Pattern): string {
     .toLowerCase()
 }
 
-function filterPatterns(list: Pattern[], q: string, qOutput: string, qInput: string, mode: string): Pattern[] {
-  const needle = q.trim().toLowerCase()
+function filterPatterns(list: Pattern[], qOutput: string, qInput: string, mode: string): Pattern[] {
   const outNeedle = qOutput.trim().toLowerCase()
   const inNeedle = qInput.trim().toLowerCase()
   return list.filter((p) => {
@@ -318,8 +325,7 @@ function filterPatterns(list: Pattern[], q: string, qOutput: string, qInput: str
     const inHay = patternInputHay(p)
     if (outNeedle && !outHay.includes(outNeedle)) return false
     if (inNeedle && !inHay.includes(inNeedle)) return false
-    if (!needle) return true
-    return outHay.includes(needle) || inHay.includes(needle) || `${p.id} ${p.mode}`.toLowerCase().includes(needle)
+    return true
   })
 }
 
@@ -587,17 +593,16 @@ export async function dispatchMock(input: MockRequestInput): Promise<unknown> {
 
   if (method === 'GET' && pathname === '/api/v1/pattern-providers') {
     requireSession(input.headers)
-    const q = search.get('q') || ''
     const qOutput = search.get('qOutput') || ''
     const qInput = search.get('qInput') || ''
     const mode = search.get('mode') || 'all'
-    const filtering = !!(q.trim() || qOutput.trim() || qInput.trim() || (mode && mode !== 'all'))
+    const filtering = !!(qOutput.trim() || qInput.trim() || (mode && mode !== 'all'))
     const providers = listProviderBoards()
       .map((board) => {
         const slots = board.slots
           .map((s) => {
             if (!s.pattern) return filtering ? null : s
-            if (!filterPatterns([s.pattern], q, qOutput, qInput, mode).length) {
+            if (!filterPatterns([s.pattern], qOutput, qInput, mode).length) {
               return filtering ? null : { index: s.index, pattern: null }
             }
             return s
@@ -641,13 +646,12 @@ export async function dispatchMock(input: MockRequestInput): Promise<unknown> {
 
   if (method === 'GET' && pathname === '/api/v1/patterns') {
     requireSession(input.headers)
-    const q = search.get('q') || ''
     const qOutput = search.get('qOutput') || ''
     const qInput = search.get('qInput') || ''
     const mode = search.get('mode') || 'all'
     const page = Number(search.get('page') || '1') || 1
     const pageSize = Number(search.get('pageSize') || '50') || 50
-    const filtered = filterPatterns(listPatternsFlat(), q, qOutput, qInput, mode)
+    const filtered = filterPatterns(listPatternsFlat(), qOutput, qInput, mode)
     return paginate(filtered, page, pageSize)
   }
 
@@ -691,11 +695,37 @@ export async function dispatchMock(input: MockRequestInput): Promise<unknown> {
               id: 'minecraft:redstone',
               displayName: 'Redstone Dust',
               amount: String(amountNum),
+              total: String(amountNum),
+              stock: String(Math.max(amountNum, 64)),
+              toCraft: '0',
               craftable: false,
               iconUrl: '/api/v1/icons/item/minecraft/redstone',
             },
           ]
-        : []
+        : [
+            {
+              key: 'item:minecraft:diamond',
+              id: 'minecraft:diamond',
+              displayName: 'Diamond',
+              amount: String(amountNum),
+              total: String(amountNum),
+              stock: '0',
+              toCraft: String(amountNum),
+              craftable: false,
+              iconUrl: '/api/v1/icons/item/minecraft/diamond',
+            },
+            {
+              key: 'item:minecraft:quartz',
+              id: 'minecraft:quartz',
+              displayName: 'Nether Quartz',
+              amount: String(amountNum * 2),
+              total: String(amountNum * 2),
+              stock: String(amountNum),
+              toCraft: String(amountNum),
+              craftable: false,
+              iconUrl: '/api/v1/icons/item/minecraft/quartz',
+            },
+          ]
     plans.set(planId, {
       planId,
       key: item.key,
@@ -793,7 +823,210 @@ export async function dispatchMock(input: MockRequestInput): Promise<unknown> {
     return { ok: true, message: 'Cancelled (mock)' }
   }
 
+  if (method === 'GET' && pathname === '/api/v1/encoding/status') {
+    requireSession(input.headers)
+    return {
+      ok: true,
+      blankPatterns: String(blankPatternStock),
+      modes: { crafting: true, processing: true, smithing: true, stonecutting: true },
+    }
+  }
+
+  if (method === 'POST' && pathname === '/api/v1/encoding/resolve') {
+    requireSession(input.headers)
+    const body = bodyOf<{
+      mode?: string
+      inputs?: Array<{ key?: string; id?: string; amount?: string; index?: number }>
+      outputs?: Array<{ key?: string; id?: string; amount?: string }>
+      recipeId?: string
+    }>(input.data)
+    return { ok: true, ...mockResolveEncoding(body) }
+  }
+
+  if (method === 'POST' && pathname === '/api/v1/encoding/stonecutting/options') {
+    requireSession(input.headers)
+    const body = bodyOf<{ input?: { key?: string; id?: string } }>(input.data)
+    const inputItem = resolveSlotItem(body.input || {})
+    if (!inputItem) throw new MockHttpError(400, 'invalid_item', 'Unknown input (mock)')
+    return {
+      ok: true,
+      options: [
+        {
+          recipeId: `mock:stonecutting/${inputItem.id}/bricks`,
+          output: {
+            ...inputItem,
+            id: `${inputItem.id}_bricks`,
+            key: `item:${inputItem.id}_bricks`,
+            displayName: `${inputItem.displayName} Bricks`,
+            amount: '1',
+          },
+        },
+        {
+          recipeId: `mock:stonecutting/${inputItem.id}/stairs`,
+          output: {
+            ...inputItem,
+            id: `${inputItem.id}_stairs`,
+            key: `item:${inputItem.id}_stairs`,
+            displayName: `${inputItem.displayName} Stairs`,
+            amount: '1',
+          },
+        },
+      ],
+    }
+  }
+
+  if (method === 'POST' && pathname === '/api/v1/encoding/encode') {
+    const session = requireSession(input.headers)
+    const body = bodyOf<{
+      mode?: string
+      inputs?: Array<{ key?: string; id?: string; amount?: string; index?: number }>
+      outputs?: Array<{ key?: string; id?: string; amount?: string }>
+      recipeId?: string
+      providerId?: string
+      slotIndex?: number
+      substitute?: boolean
+      substituteFluids?: boolean
+    }>(input.data)
+    if (!body.providerId) throw new MockHttpError(400, 'bad_request', 'providerId required (mock)')
+    if (blankPatternStock <= 0) throw new MockHttpError(400, 'no_blank_pattern', 'No blank patterns (mock)')
+
+    const preview = mockResolveEncoding({
+      mode: body.mode,
+      inputs: body.inputs,
+      outputs: body.outputs,
+      recipeId: body.recipeId,
+    })
+    if (!preview.canEncode || !preview.primaryOutput) {
+      throw new MockHttpError(400, 'invalid_recipe', preview.warning || 'Cannot encode (mock)')
+    }
+
+    blankPatternStock -= 1
+    const mode = (body.mode || 'crafting') as Pattern['mode']
+    const pattern: Pattern = {
+      id: `encoded-${crypto.randomUUID()}`,
+      name: preview.primaryOutput.displayName,
+      mode: mode || 'crafting',
+      encoder: session.account,
+      recipeId: preview.recipeId,
+      craftingShape: preview.craftingShape,
+      primaryOutput: preview.primaryOutput,
+      outputs: preview.outputs || [preview.primaryOutput],
+      inputs: (body.inputs || [])
+        .map((s) => {
+          const it = resolveSlotItem(s)
+          return it ? { item: it, multiplier: s.amount || '1' } : null
+        })
+        .filter(Boolean) as Pattern['inputs'],
+      substitute: !!body.substitute,
+      substituteFluids: !!body.substituteFluids,
+    }
+    try {
+      const slotIndex = insertEncodedPattern(body.providerId, pattern, body.slotIndex)
+      pushAudit({
+        action: 'pattern_encode',
+        actorUuid: session.playerUuid,
+        actorName: session.account,
+        detail: `${mode} → ${body.providerId}#${slotIndex}`,
+      })
+      return {
+        ok: true,
+        providerId: body.providerId,
+        slotIndex,
+        pattern: { ...pattern, slotIndex },
+        message: 'Encoded (mock)',
+      }
+    } catch (e) {
+      blankPatternStock += 1
+      const err = e as { code?: string; message?: string; status?: number }
+      throw new MockHttpError(err.status || 400, err.code || 'encode_failed', err.message || 'Encode failed (mock)')
+    }
+  }
+
   throw new MockHttpError(404, 'not_found', `No mock handler for ${method} ${pathname}`)
+}
+
+function slotRefKey(s: { key?: string; id?: string }): string {
+  return (s.key || (s.id ? `item:${s.id}` : '')).trim()
+}
+
+function resolveSlotItem(s: { key?: string; id?: string; amount?: string }): Item | undefined {
+  const key = slotRefKey(s)
+  if (!key) return undefined
+  const hit = findItem(key) || findItem(key.replace(/^item:/, '')) || mockItems.find((i) => i.id === s.id || i.key === key)
+  if (hit) return { ...hit, amount: s.amount || '1' }
+  if (s.id || key) {
+    const id = s.id || key.replace(/^item:/, '')
+    return {
+      key: `item:${id}`,
+      id,
+      displayName: id.split(':').pop() || id,
+      amount: s.amount || '1',
+      craftable: true,
+      iconUrl: `/api/v1/icons/item/${id.replace(':', '/')}`,
+    }
+  }
+  return undefined
+}
+
+function mockResolveEncoding(body: {
+  mode?: string
+  inputs?: Array<{ key?: string; id?: string; amount?: string; index?: number }>
+  outputs?: Array<{ key?: string; id?: string; amount?: string }>
+  recipeId?: string
+}): {
+  canEncode: boolean
+  primaryOutput?: Item
+  outputs?: Item[]
+  recipeId?: string
+  craftingShape?: string
+  warning?: string
+} {
+  const mode = body.mode || 'crafting'
+  const inputs = body.inputs || []
+  const outputs = body.outputs || []
+  if (mode === 'crafting') {
+    const filled = inputs.filter((s) => slotRefKey(s))
+    if (!filled.length) return { canEncode: false, warning: 'Empty crafting grid (mock)' }
+    const first = resolveSlotItem(filled[0]!)
+    if (!first) return { canEncode: false, warning: 'Unknown input (mock)' }
+    const out = { ...first, amount: '1' }
+    return {
+      canEncode: true,
+      recipeId: `mock:craft/${first.id}`,
+      craftingShape: filled.length === 1 ? 'shapeless' : 'shaped',
+      primaryOutput: out,
+      outputs: [out],
+    }
+  }
+  if (mode === 'processing') {
+    const inOk = inputs.some((s) => slotRefKey(s))
+    const outItems = outputs.map((s) => resolveSlotItem(s)).filter(Boolean) as Item[]
+    if (!inOk || !outItems.length) return { canEncode: false, warning: 'Need inputs and outputs (mock)' }
+    return { canEncode: true, primaryOutput: outItems[0], outputs: outItems }
+  }
+  if (mode === 'smithing') {
+    if (inputs.filter((s) => slotRefKey(s)).length < 3) {
+      return { canEncode: false, warning: 'Need template, base, addition (mock)' }
+    }
+    const out = resolveSlotItem(inputs[2]!) || resolveSlotItem(inputs[1]!)
+    if (!out) return { canEncode: false, warning: 'Invalid smithing slots (mock)' }
+    const primary = { ...out, amount: '1' }
+    return { canEncode: true, primaryOutput: primary, outputs: [primary] }
+  }
+  if (mode === 'stonecutting') {
+    const input = resolveSlotItem(inputs[0] || {})
+    if (!input) return { canEncode: false, warning: 'Need input (mock)' }
+    if (!body.recipeId) return { canEncode: false, warning: 'Select a recipe (mock)' }
+    const out = {
+      ...input,
+      id: `${input.id}_cut`,
+      key: `item:${input.id}_cut`,
+      displayName: `${input.displayName} (Cut)`,
+      amount: '1',
+    }
+    return { canEncode: true, recipeId: body.recipeId, primaryOutput: out, outputs: [out] }
+  }
+  return { canEncode: false, warning: 'Unknown mode (mock)' }
 }
 
 export function listMockJobs(): CraftJob[] {

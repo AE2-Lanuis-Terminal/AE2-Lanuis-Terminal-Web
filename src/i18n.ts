@@ -24,11 +24,6 @@ export function resolveLocale(pref: LocalePreference = readLocalePreference()): 
   return navigator.language.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en'
 }
 
-/** @deprecated 用 resolveLocale；保留别名供启动路径调用 */
-export function detectLocale(): AppLocale {
-  return resolveLocale()
-}
-
 function applyDocumentLang(locale: AppLocale) {
   document.documentElement.lang = locale === 'zh-CN' ? 'zh-CN' : 'en'
 }
@@ -53,11 +48,6 @@ export function applyResolvedLocale(pref: LocalePreference = readLocalePreferenc
 export function setLocalePreference(pref: LocalePreference) {
   localStorage.setItem(STORAGE_KEY, pref)
   applyResolvedLocale(pref)
-}
-
-/** 锁定为具体语言（兼容旧调用） */
-export function setLocale(locale: AppLocale) {
-  setLocalePreference(locale)
 }
 
 if (typeof window !== 'undefined') {

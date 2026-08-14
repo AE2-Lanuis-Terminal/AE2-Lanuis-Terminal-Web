@@ -32,14 +32,36 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
     v-bind="forwarded"
     :class="
       cn(
-        'data-checked:bg-primary data-unchecked:bg-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 dark:data-unchecked:bg-input/80 shrink-0 rounded-full border border-transparent focus-visible:ring-3 aria-invalid:ring-3 data-[size=default]:h-[18.4px] data-[size=default]:w-8 data-[size=sm]:h-3.5 data-[size=sm]:w-6 peer group/switch relative inline-flex items-center transition-all outline-none after:absolute after:-inset-x-3 after:-inset-y-2 data-disabled:cursor-not-allowed data-disabled:opacity-50',
+        // 轨道：关闭态也保持可见（凹槽 + 描边），避免透明消失
+        'peer group/switch relative inline-flex shrink-0 items-center rounded-full outline-none transition-[background-color,border-color,box-shadow]',
+        'border border-[color:var(--color-line-bright)]',
+        'bg-[color-mix(in_srgb,var(--color-slot)_92%,#000000)]',
+        'shadow-[inset_0_1px_2px_color-mix(in_srgb,#000_45%,transparent)]',
+        'data-checked:border-[color:color-mix(in_srgb,var(--color-cyan)_55%,var(--color-line))]',
+        'data-checked:bg-cyan',
+        'data-checked:shadow-[inset_0_1px_0_color-mix(in_srgb,#fff_22%,transparent),0_0_10px_color-mix(in_srgb,var(--color-cyan)_28%,transparent)]',
+        'focus-visible:ring-2 focus-visible:ring-cyan/35 focus-visible:ring-offset-0',
+        'data-disabled:cursor-not-allowed data-disabled:opacity-45',
+        'data-[size=default]:h-[1.125rem] data-[size=default]:w-8',
+        'data-[size=sm]:h-3.5 data-[size=sm]:w-6',
+        'after:absolute after:-inset-x-3 after:-inset-y-2',
         props.class,
       )
     "
   >
     <SwitchThumb
       data-slot="switch-thumb"
-      class="bg-background dark:data-unchecked:bg-foreground dark:data-checked:bg-primary-foreground rounded-full group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=default]/switch:data-unchecked:translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0 pointer-events-none block ring-0 transition-transform"
+      :class="
+        cn(
+          'pointer-events-none block rounded-full ring-0 transition-transform will-change-transform',
+          'bg-[color:var(--color-ink)] shadow-[0_1px_2px_color-mix(in_srgb,#000_50%,transparent)]',
+          'data-[state=checked]:bg-[color:var(--primary-foreground)]',
+          'group-data-[size=default]/switch:size-3.5 group-data-[size=sm]/switch:size-2.5',
+          'translate-x-[0.13rem]',
+          'group-data-[size=default]/switch:data-[state=checked]:translate-x-[0.94rem]',
+          'group-data-[size=sm]/switch:data-[state=checked]:translate-x-[0.69rem]',
+        )
+      "
     >
       <slot name="thumb" v-bind="slotProps" />
     </SwitchThumb>

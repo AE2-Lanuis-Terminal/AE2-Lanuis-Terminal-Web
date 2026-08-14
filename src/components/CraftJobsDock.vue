@@ -39,11 +39,11 @@ function quantityLabel(job: (typeof pinnedBusyJobs.value)[number]) {
           <ItemIcon :item="toast.output" />
         </span>
         <div class="min-w-0 flex-1">
-          <p class="m-0 text-[12px] font-medium text-ink">{{ t('jobs.completeToast') }}</p>
-          <p class="mono m-0 mt-0.5 truncate text-[11px] text-muted">
+          <p class="m-0 text-[0.75rem] font-medium text-ink">{{ t('jobs.completeToast') }}</p>
+          <p class="mono m-0 mt-0.5 truncate text-[0.69rem] text-muted">
             {{ toast.output ? stripMcFormat(toast.output.displayName) : toast.detail || toast.cpuName }}
           </p>
-          <p class="m-0 mt-0.5 truncate text-[10px] text-muted">{{ toast.cpuName }}</p>
+          <p class="m-0 mt-0.5 truncate text-[0.63rem] text-muted">{{ toast.cpuName }}</p>
         </div>
         <button
           type="button"
@@ -67,7 +67,7 @@ function quantityLabel(job: (typeof pinnedBusyJobs.value)[number]) {
         :aria-label="dockCollapsed ? t('jobs.dockExpand') : t('jobs.dockCollapse')"
         @click="store.setDockCollapsed(!dockCollapsed)"
       >
-        <span class="m-0 text-[12px] font-medium text-ink">{{ t('jobs.dockTitle') }}</span>
+        <span class="m-0 text-[0.75rem] font-medium text-ink">{{ t('jobs.dockTitle') }}</span>
         <span class="inline-flex size-6 shrink-0 items-center justify-center text-muted" aria-hidden="true">
           <ChevronDownIcon v-if="!dockCollapsed" class="size-3.5" />
           <ChevronUpIcon v-else class="size-3.5" />
@@ -80,10 +80,10 @@ function quantityLabel(job: (typeof pinnedBusyJobs.value)[number]) {
               <ItemIcon :item="job.output" />
             </span>
             <div class="min-w-0 flex-1">
-              <p class="m-0 truncate text-[12px] text-ink">{{ label(job) }}</p>
-              <p class="mono m-0 truncate text-[10px] text-muted">{{ job.cpuName }}</p>
+              <p class="m-0 truncate text-[0.75rem] text-ink">{{ label(job) }}</p>
+              <p class="mono m-0 truncate text-[0.63rem] text-muted">{{ job.cpuName }}</p>
             </div>
-            <span v-if="jobProgressPercent(job) != null" class="mono shrink-0 text-[11px] text-cyan"> {{ Math.round(jobProgressPercent(job)!) }}% </span>
+            <span v-if="jobProgressPercent(job) != null" class="mono shrink-0 text-[0.69rem] text-cyan"> {{ Math.round(jobProgressPercent(job)!) }}% </span>
             <button
               type="button"
               class="inline-flex size-6 shrink-0 items-center justify-center rounded-[var(--app-radius-sm)] text-muted hover:bg-[color-mix(in_srgb,var(--color-cyan-dim)_16%,transparent)] hover:text-ink"
@@ -104,7 +104,7 @@ function quantityLabel(job: (typeof pinnedBusyJobs.value)[number]) {
           >
             <div class="h-full rounded-full bg-cyan transition-[width] duration-500 ease-out" :style="{ width: `${jobProgressPercent(job)}%` }" />
           </div>
-          <p v-if="quantityLabel(job)" class="mono m-0 mt-1 text-[10px] text-muted">{{ quantityLabel(job) }}</p>
+          <p v-if="quantityLabel(job)" class="mono m-0 mt-1 text-[0.63rem] text-muted">{{ quantityLabel(job) }}</p>
         </article>
       </div>
     </section>
@@ -114,13 +114,12 @@ function quantityLabel(job: (typeof pinnedBusyJobs.value)[number]) {
 <style scoped>
 .ui-craft-toast-enter-active,
 .ui-craft-toast-leave-active {
-  transition:
-    opacity 0.2s ease,
+  transition: opacity 0.2s ease,
     transform 0.2s ease;
 }
 .ui-craft-toast-enter-from,
 .ui-craft-toast-leave-to {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(0.5rem);
 }
 </style>

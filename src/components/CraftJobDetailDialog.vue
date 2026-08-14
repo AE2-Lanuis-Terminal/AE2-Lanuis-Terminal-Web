@@ -82,7 +82,7 @@ async function cancel() {
           <ItemIcon :item="job.output" />
         </span>
         <div class="min-w-0">
-          <h2 class="m-0 truncate text-[14px] font-semibold tracking-[-0.02em]">
+          <h2 class="m-0 truncate text-[0.88rem] font-semibold tracking-[-0.02em]">
             {{ job?.cpuName || cpuName || t('jobs.detailTitle') }}
           </h2>
           <p class="mono m-0 mt-0.5 truncate text-xs text-muted">
@@ -98,7 +98,7 @@ async function cancel() {
 
     <div v-if="job" class="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
       <div class="shrink-0">
-        <div class="mb-1 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted">
+        <div class="mb-1 flex flex-wrap items-center justify-between gap-2 text-[0.69rem] text-muted">
           <span class="mono">
             <template v-if="quantityLabel">{{ quantityLabel }}</template>
             <template v-else>{{ t('jobs.crafting') }}</template>
@@ -118,7 +118,7 @@ async function cancel() {
         </div>
       </div>
 
-      <div class="grid shrink-0 grid-cols-[minmax(0,1fr)_4.5rem_4.5rem_4.5rem] gap-1 border-b border-line pb-1 text-[10px] uppercase tracking-wide text-muted">
+      <div class="grid shrink-0 grid-cols-[minmax(0,1fr)_4.5rem_4.5rem_4.5rem] gap-1 border-b border-line pb-1 text-[0.63rem] uppercase tracking-wide text-muted">
         <span>{{ t('jobs.colItem') }}</span>
         <span class="text-right">{{ t('jobs.colStored') }}</span>
         <span class="text-right">{{ t('jobs.colActive') }}</span>
@@ -137,17 +137,17 @@ async function cancel() {
               <span class="inline-block size-6 shrink-0">
                 <ItemIcon :item="row.item" />
               </span>
-              <span class="min-w-0 truncate text-[12px]" :title="stripMcFormat(row.item.displayName)">
+              <span class="min-w-0 truncate text-[0.75rem]" :title="stripMcFormat(row.item.displayName)">
                 <McFormattedText :text="row.item.displayName" />
               </span>
             </div>
-            <span class="mono text-right text-[12px] tabular-nums" :class="row.stored === '0' ? 'text-muted' : ''">
+            <span class="mono text-right text-[0.75rem] tabular-nums" :class="row.stored === '0' ? 'text-muted' : ''">
               {{ formatCompactCount(row.stored) }}
             </span>
-            <span class="mono text-right text-[12px] tabular-nums text-cyan" :class="row.active === '0' ? '!text-muted' : ''">
+            <span class="mono text-right text-[0.75rem] tabular-nums text-cyan" :class="row.active === '0' ? '!text-muted' : ''">
               {{ formatCompactCount(row.active) }}
             </span>
-            <span class="mono text-right text-[12px] tabular-nums" :class="row.pending === '0' ? 'text-muted' : ''">
+            <span class="mono text-right text-[0.75rem] tabular-nums" :class="row.pending === '0' ? 'text-muted' : ''">
               {{ formatCompactCount(row.pending) }}
             </span>
           </li>
@@ -160,7 +160,7 @@ async function cancel() {
       <AppButton type="button" variant="outline" size="sm" @click="onOpen(false)">
         {{ t('common.close') }}
       </AppButton>
-      <AppButton v-if="job?.busy" type="button" variant="outline" size="sm" @click="cancel">
+      <AppButton v-if="job?.busy" type="button" variant="danger" size="sm" @click="cancel">
         {{ t('common.cancel') }}
       </AppButton>
     </template>

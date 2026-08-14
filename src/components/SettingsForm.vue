@@ -1,18 +1,18 @@
 <!--
-  主题/字体/语言/动画对 Web 与桌面均可用。
+  主题/字体/语言/动画/缩放对 Web 与桌面均可用。
   关闭行为分区仅 canUseSystemTray（桌面）显示。
 -->
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
-import { useSettingsStore, type CloseBehavior, type ColorScheme, type FontPreset } from '../stores/settings'
+import { useSettingsStore, type CloseBehavior, type ColorScheme, type FontPreset, type UiScale } from '../stores/settings'
 import type { LocalePreference } from '../i18n'
 import { AppSwitch } from '@/ui'
 import { canUseSystemTray } from '../lib/runtime'
 
 const { t } = useI18n()
 const settings = useSettingsStore()
-const { colorScheme, fontPreset, locale, closeBehavior, animationsEnabled } = storeToRefs(settings)
+const { colorScheme, fontPreset, locale, closeBehavior, animationsEnabled, uiScale } = storeToRefs(settings)
 const showCloseBehavior = canUseSystemTray()
 
 const schemes: { id: ColorScheme; labelKey: string }[] = [
@@ -39,6 +39,8 @@ const closeBehaviors: { id: CloseBehavior; labelKey: string }[] = [
   { id: 'tray', labelKey: 'settings.closeTray' },
   { id: 'exit', labelKey: 'settings.closeExit' },
 ]
+
+const scales: UiScale[] = [1, 2, 3, 4]
 </script>
 
 <template>
@@ -50,7 +52,7 @@ const closeBehaviors: { id: CloseBehavior; labelKey: string }[] = [
           v-for="item in schemes"
           :key="item.id"
           type="button"
-          class="ui-glass-chip h-8 rounded-[5px] text-[12px] font-medium transition-colors"
+          class="ui-glass-chip h-8 rounded-[5px] text-[0.75rem] font-medium transition-colors"
           :class="
             colorScheme === item.id
               ? '!border-[color:var(--glass-border-bright)] bg-[color-mix(in_srgb,var(--color-cyan-dim)_22%,var(--glass-bg))] text-ink'
@@ -70,7 +72,7 @@ const closeBehaviors: { id: CloseBehavior; labelKey: string }[] = [
           v-for="item in fonts"
           :key="item.id"
           type="button"
-          class="ui-glass-chip flex h-9 items-center justify-between rounded-[5px] px-3 text-left text-[13px] transition-colors"
+          class="ui-glass-chip flex h-9 items-center justify-between rounded-[5px] px-3 text-left text-[0.81rem] transition-colors"
           :class="
             fontPreset === item.id
               ? '!border-[color:var(--glass-border-bright)] bg-[color-mix(in_srgb,var(--color-cyan-dim)_18%,var(--glass-bg))] text-ink'
@@ -79,7 +81,7 @@ const closeBehaviors: { id: CloseBehavior; labelKey: string }[] = [
           @click="settings.setFontPreset(item.id)"
         >
           <span>{{ t(item.labelKey) }}</span>
-          <span v-if="fontPreset === item.id" class="text-[10px] font-semibold tracking-wide text-cyan"> ✓ </span>
+          <span v-if="fontPreset === item.id" class="text-[0.63rem] font-semibold tracking-wide text-cyan"> ✓ </span>
         </button>
       </div>
     </section>
@@ -91,7 +93,7 @@ const closeBehaviors: { id: CloseBehavior; labelKey: string }[] = [
           v-for="item in locales"
           :key="item.id"
           type="button"
-          class="ui-glass-chip h-8 rounded-[5px] text-[12px] font-medium transition-colors"
+          class="ui-glass-chip h-8 rounded-[5px] text-[0.75rem] font-medium transition-colors"
           :class="
             locale === item.id
               ? '!border-[color:var(--glass-border-bright)] bg-[color-mix(in_srgb,var(--color-cyan-dim)_22%,var(--glass-bg))] text-ink'
@@ -106,11 +108,32 @@ const closeBehaviors: { id: CloseBehavior; labelKey: string }[] = [
 
     <section>
       <div class="ui-label !mb-1.5">{{ t('settings.motion') }}</div>
-      <div class="ui-glass-chip flex h-9 items-center justify-between rounded-[5px] px-3 text-[13px]">
+      <div class="ui-glass-chip flex h-9 items-center justify-between rounded-[5px] px-3 text-[0.81rem]">
         <span class="text-ink">{{ t('settings.animations') }}</span>
         <AppSwitch :model-value="animationsEnabled" @update:model-value="settings.setAnimationsEnabled($event)" />
       </div>
-      <p class="mt-1.5 text-[11px] text-muted">{{ t('settings.animationsHint') }}</p>
+      <p class="mt-1.5 text-[0.69rem] text-muted">{{ t('settings.animationsHint') }}</p>
+    </section>
+
+    <section>
+      <div class="ui-label !mb-1.5">{{ t('settings.uiScale') }}</div>
+      <div class="grid grid-cols-4 gap-1.5">
+        <button
+          v-for="n in scales"
+          :key="n"
+          type="button"
+          class="ui-glass-chip h-8 rounded-[5px] text-[0.75rem] font-medium transition-colors"
+          :class="
+            uiScale === n
+              ? '!border-[color:var(--glass-border-bright)] bg-[color-mix(in_srgb,var(--color-cyan-dim)_22%,var(--glass-bg))] text-ink'
+              : 'text-muted hover:border-[color:var(--glass-border-bright)] hover:bg-[var(--glass-hover-bg)] hover:text-ink hover:shadow-[var(--glass-hover-glow)]'
+          "
+          @click="settings.setUiScale(n)"
+        >
+          {{ n }}
+        </button>
+      </div>
+      <p class="mt-1.5 text-[0.69rem] text-muted">{{ t('settings.uiScaleHint') }}</p>
     </section>
 
     <section v-if="showCloseBehavior">
@@ -120,7 +143,7 @@ const closeBehaviors: { id: CloseBehavior; labelKey: string }[] = [
           v-for="item in closeBehaviors"
           :key="item.id"
           type="button"
-          class="ui-glass-chip flex h-9 items-center justify-between rounded-[5px] px-3 text-left text-[13px] transition-colors"
+          class="ui-glass-chip flex h-9 items-center justify-between rounded-[5px] px-3 text-left text-[0.81rem] transition-colors"
           :class="
             closeBehavior === item.id
               ? '!border-[color:var(--glass-border-bright)] bg-[color-mix(in_srgb,var(--color-cyan-dim)_18%,var(--glass-bg))] text-ink'
@@ -129,7 +152,7 @@ const closeBehaviors: { id: CloseBehavior; labelKey: string }[] = [
           @click="settings.setCloseBehavior(item.id)"
         >
           <span>{{ t(item.labelKey) }}</span>
-          <span v-if="closeBehavior === item.id" class="text-[10px] font-semibold tracking-wide text-cyan"> ✓ </span>
+          <span v-if="closeBehavior === item.id" class="text-[0.63rem] font-semibold tracking-wide text-cyan"> ✓ </span>
         </button>
       </div>
     </section>

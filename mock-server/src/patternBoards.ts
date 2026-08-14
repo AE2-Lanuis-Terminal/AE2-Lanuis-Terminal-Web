@@ -158,3 +158,24 @@ export function movePatterns(ops: MoveOp[]): void {
     board.usedSlots = board.slots.filter((s) => s.pattern).length
   }
 }
+
+/** 将已编码样板写入供应器空槽；返回实际槽位下标 */
+export function insertEncodedPattern(providerId: string, pattern: Pattern, slotIndex?: number): number {
+  const board = boards.find((b) => b.id === providerId)
+  if (!board) throw Object.assign(new Error('Provider not found'), { code: 'provider_not_found', status: 400 })
+  if (board.movable === false) throw Object.assign(new Error('Provider not movable'), { code: 'not_movable', status: 400 })
+
+  let target = slotIndex
+  if (target == null) {
+    const empty = board.slots.find((s) => !s.pattern)
+    if (!empty) throw Object.assign(new Error('No empty slot'), { code: 'no_empty_slot', status: 400 })
+    target = empty.index
+  }
+  const slot = board.slots.find((s) => s.index === target)
+  if (!slot) throw Object.assign(new Error('Invalid slotIndex'), { code: 'bad_slot', status: 400 })
+  if (slot.pattern) throw Object.assign(new Error('Slot occupied'), { code: 'slot_occupied', status: 400 })
+
+  slot.pattern = clonePattern(pattern, board, target)
+  board.usedSlots = board.slots.filter((s) => s.pattern).length
+  return target
+}
