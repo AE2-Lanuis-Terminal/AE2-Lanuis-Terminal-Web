@@ -1,0 +1,6 @@
+dist
+node_modules
+*.local
+.env.production
+.DS_Store
+mock-server/_handlers_ref.ts

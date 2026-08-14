@@ -1,0 +1,31 @@
+/**
+ * 薄 Gradle 工程：供主仓 :web:npmBuild 嵌入 jar。
+ * 不引入 Node Gradle 插件，避免额外依赖；直接调 npm/npm.cmd。
+ */
+plugins {
+    id 'base'
+}
+
+def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+def npmCmd = isWindows ? 'npm.cmd' : 'npm'
+
+tasks.register('npmInstall', Exec) {
+    group = 'build'
+    description = 'npm install --legacy-peer-deps'
+    workingDir = project.projectDir
+    // openapi-typescript 仍声明 peer typescript@^5，与本仓 TS 6 冲突
+    commandLine npmCmd, 'install', '--legacy-peer-deps'
+    inputs.files('package.json')
+    outputs.dir('node_modules')
+}
+
+tasks.register('npmBuild', Exec) {
+    group = 'build'
+    description = '构建 Vite 产物到 dist/'
+    dependsOn('npmInstall')
+    workingDir = project.projectDir
+    commandLine npmCmd, 'run', 'build'
+    inputs.dir('src')
+    inputs.files('package.json', 'vite.config.ts', 'index.html', 'tsconfig.json', 'tsconfig.app.json')
+    outputs.dir('dist')
+}

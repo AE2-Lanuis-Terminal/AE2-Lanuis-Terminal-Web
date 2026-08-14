@@ -1,0 +1,97 @@
+# 发行：CHANGELOG 新增 ## [X.Y.Z] 时构建；默认不推 tag / Release（PUBLISH=false）
+name: release
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      force_version:
+        description: '强制发行版本（如 0.2.0）'
+        required: false
+        default: ''
+
+env:
+  PUBLISH: 'false'
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      is_release: ${{ steps.detect.outputs.is_release }}
+      version: ${{ steps.detect.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: detect
+        shell: bash
+        run: |
+          chmod +x scripts/is-release-changelog.sh
+          BASE="origin/main"
+          if [[ "${{ github.event_name }}" == "push" && -n "${{ github.event.before }}" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
+            BASE="${{ github.event.before }}"
+          fi
+          set +e
+          OUT="$(./scripts/is-release-changelog.sh "$BASE" 2>/dev/null)"
+          CODE=$?
+          set -e
+          echo "base=$BASE"
+          echo "$OUT"
+          IS=false
+          VER=""
+          if [[ "$CODE" -eq 0 ]]; then
+            IS=true
+            VER="$(echo "$OUT" | sed -n 's/^RELEASE_VERSION=//p' | head -1)"
+          fi
+          if [[ -n "${{ inputs.force_version }}" ]]; then
+            IS=true
+            VER="${{ inputs.force_version }}"
+          fi
+          echo "is_release=$IS" >> "$GITHUB_OUTPUT"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: detect
+    if: needs.detect.outputs.is_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: package.json
+
+      - name: Verify package.json version
+        if: needs.detect.outputs.version != ''
+        shell: bash
+        run: |
+          EXPECT="${{ needs.detect.outputs.version }}"
+          ACTUAL="$(node -p "require('./package.json').version")"
+          echo "expect=$EXPECT actual=$ACTUAL"
+          test "$ACTUAL" = "$EXPECT"
+
+      - run: npm install --legacy-peer-deps
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist-v${{ needs.detect.outputs.version || 'release' }}
+          path: dist/
+
+      - name: Create tag and GitHub Release
+        if: ${{ env.PUBLISH == 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.detect.outputs.version }}
+          name: Web v${{ needs.detect.outputs.version }}
+          body: |
+            Shared frontend release. Server and Client should pin this tag.
+          generate_release_notes: true

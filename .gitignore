@@ -1,0 +1,19 @@
+# Node
+node_modules/
+dist/
+.vite/
+.env.production
+.env.local
+*.local
+package-lock.json
+npm-shrinkwrap.json
+yarn.lock
+pnpm-lock.yaml
+
+# OS / IDE
+.idea/
+.DS_Store
+Thumbs.db
+
+# Generated (committed after gen:api for consumers without openapi-typescript)
+# src/types/generated.ts is committed

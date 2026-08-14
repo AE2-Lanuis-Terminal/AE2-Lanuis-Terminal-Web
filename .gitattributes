@@ -1,0 +1,16 @@
+# 强制工作区与仓库均为 LF（覆盖 Windows 全局 core.autocrlf=true）
+* text eol=lf
+
+*.{cmd,bat,ps1} text eol=crlf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.node binary

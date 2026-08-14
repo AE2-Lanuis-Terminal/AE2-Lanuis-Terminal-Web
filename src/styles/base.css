@@ -1,0 +1,1452 @@
+/*
+ * 原子类 .ui-* 供未走 App* 的原生控件复用（登录 Web 浮层等）。
+ * data-motion=off 时强制停用动画，兼顾无障碍与设置项。
+ * .me-surface 提供 ME 终端网格氛围背景。
+ */
+/*
+ * Fluix token、shadcn 变量映射、ME 表面与原子 UI。
+ * 主题/字体/动效由 html data-* 切换，与 settings store 对齐。
+ */
+
+/*
+ * 全局样式：Fluix 设计 token、shadcn 变量映射、ME 表面与原子 UI 类。
+ * 主题由 settings store 写入 html[data-theme] / data-app-font / data-motion。
+ * Web 与桌面共用；勿在业务组件硬编码色值，优先用 token。
+ */
+
+/* 引入外部样式或字体 */
+@import 'tailwindcss';
+/* 引入外部样式或字体 */
+@import 'tw-animate-css';
+
+/* 字体由 src/lib/fonts.ts 按预设按需加载，勿在此全量 @import / @font-face */
+/* 注册 Tailwind dark 变体 */
+@custom-variant dark (&:is(.dark *));
+/* Reka / shadcn：data-open|closed 对应 data-state，否则弹层动画类不会命中 */
+@custom-variant data-open (&:where([data-state='open'], [data-open]:not([data-open='false'])));
+@custom-variant data-closed (&:where([data-state='closed'], [data-closed]:not([data-closed='false'])));
+/* 声明设计 token / 主题扩展 */
+@theme {
+  /* CSS 变量 --color-void */
+  --color-void: #0b0d11;
+  /* CSS 变量 --color-shell */
+  --color-shell: #10141b;
+  /* CSS 变量 --color-panel */
+  --color-panel: #151a22;
+  /* CSS 变量 --color-slot */
+  --color-slot: #0e1218;
+  /* CSS 变量 --color-line */
+  --color-line: #2a3342;
+  /* CSS 变量 --color-line-bright */
+  --color-line-bright: #3d4a5e;
+  /* CSS 变量 --color-ink */
+  --color-ink: #e8eef8;
+  /* CSS 变量 --color-muted */
+  --color-muted: #8b96a8;
+  /* CSS 变量 --color-cyan */
+  --color-cyan: #5ad6ff;
+  /* CSS 变量 --color-cyan-dim */
+  --color-cyan-dim: #1f7f9e;
+  /* CSS 变量 --color-fluix */
+  --color-fluix: #7ce8ff;
+  /* CSS 变量 --color-green */
+  --color-green: #6fd992;
+  /* CSS 变量 --color-amber */
+  --color-amber: #f0b45a;
+  /* CSS 变量 --color-red */
+  --color-red: #ff6b7a;
+  /* CSS 变量 --font-ui */
+  --font-ui: 'Fusion Pixel', 'Segoe UI', 'Microsoft YaHei UI', sans-serif;
+  /* 与 UI 字体同源；.mono 仅保留等宽数字，不再单独换字体族 */
+  --font-mono: 'Fusion Pixel', 'Segoe UI', 'Microsoft YaHei UI', sans-serif;
+}
+
+/* 默认（暗色）CSS 变量与 shadcn token 映射 */
+:root {
+  /* 系统栏安全区：桌面为 0；Android WebView 常返回 0，用下限兜底 */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  /* CSS 变量 --app-radius-sm */
+  --app-radius-sm: 5px;
+  /* CSS 变量 --app-radius-md */
+  --app-radius-md: 6px;
+  /* CSS 变量 --app-radius-lg */
+  --app-radius-lg: 8px;
+  /* CSS 变量 --app-on-surface-05 */
+  --app-on-surface-05: color-mix(in srgb, var(--color-ink) 5%, transparent);
+  /* CSS 变量 --app-on-surface-08 */
+  --app-on-surface-08: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  /* CSS 变量 --app-on-surface-12 */
+  --app-on-surface-12: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  /* CSS 变量 --app-type-tracking */
+  --app-type-tracking: -0.015em;
+  /* 液态玻璃：半透明面 + 模糊 + 高光描边 */
+  --glass-blur: 18px;
+  --glass-saturate: 1.4;
+  --glass-bg: color-mix(in srgb, var(--color-panel) 52%, transparent);
+  --glass-bg-strong: color-mix(in srgb, var(--color-panel) 72%, transparent);
+  --glass-bg-soft: color-mix(in srgb, var(--color-slot) 42%, transparent);
+  --glass-border: color-mix(in srgb, var(--color-ink) 16%, transparent);
+  --glass-border-bright: color-mix(in srgb, var(--color-cyan) 28%, var(--color-line));
+  --glass-highlight: color-mix(in srgb, #ffffff 28%, transparent);
+  --glass-shadow: 0 14px 40px color-mix(in srgb, #000000 48%, transparent), 0 4px 12px color-mix(in srgb, #000000 28%, transparent);
+  --glass-shadow-sm: 0 6px 18px color-mix(in srgb, #000000 34%, transparent), 0 2px 4px color-mix(in srgb, #000000 22%, transparent);
+  --glass-hover-bg: color-mix(in srgb, var(--color-panel) 68%, transparent);
+  /* 默认 0：滚动裁切区内位移会顶出视野；有边距的容器可覆写 */
+  --glass-hover-shift: 0px;
+  --glass-hover-lift: 0 6px 16px color-mix(in srgb, #000000 28%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-cyan) 18%, transparent);
+  --glass-hover-glow: 0 0 14px color-mix(in srgb, var(--color-cyan) 12%, transparent);
+  --glass-edge-dark: color-mix(in srgb, #000000 42%, transparent);
+  --glass-edge-light: color-mix(in srgb, #ffffff 16%, transparent);
+  /* 原生滚动条：随主题 token 切换 */
+  --scrollbar-size: 10px;
+  --scrollbar-track: color-mix(in srgb, var(--color-slot) 40%, transparent);
+  --scrollbar-thumb: color-mix(in srgb, var(--color-line-bright) 55%, var(--color-cyan-dim));
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--color-cyan-dim) 58%, var(--color-line-bright));
+
+  /* shadcn / Reka：映射到 Fluix token，随 data-theme 自动切换 */
+  --radius: 0.5rem;
+  /* CSS 变量 --background */
+  --background: var(--color-shell);
+  /* CSS 变量 --foreground */
+  --foreground: var(--color-ink);
+  /* CSS 变量 --card */
+  --card: var(--color-panel);
+  /* CSS 变量 --card-foreground */
+  --card-foreground: var(--color-ink);
+  /* CSS 变量 --popover */
+  --popover: var(--color-panel);
+  /* CSS 变量 --popover-foreground */
+  --popover-foreground: var(--color-ink);
+  /* CSS 变量 --primary */
+  --primary: var(--color-cyan);
+  /* CSS 变量 --primary-foreground */
+  --primary-foreground: #071018;
+  /* CSS 变量 --secondary */
+  --secondary: var(--color-slot);
+  /* CSS 变量 --secondary-foreground */
+  --secondary-foreground: var(--color-ink);
+  /* CSS 变量 --muted */
+  --muted: var(--color-slot);
+  /* CSS 变量 --muted-foreground */
+  --muted-foreground: var(--color-muted);
+  /* CSS 变量 --accent */
+  --accent: color-mix(in srgb, var(--color-cyan-dim) 22%, var(--color-panel));
+  /* CSS 变量 --accent-foreground */
+  --accent-foreground: var(--color-ink);
+  /* CSS 变量 --destructive */
+  --destructive: var(--color-red);
+  /* CSS 变量 --border */
+  --border: var(--color-line);
+  /* CSS 变量 --input */
+  --input: var(--color-line);
+  /* CSS 变量 --ring */
+  --ring: var(--color-cyan);
+  /* CSS 变量 --chart-1 */
+  --chart-1: var(--color-cyan);
+  /* CSS 变量 --chart-2 */
+  --chart-2: var(--color-fluix);
+  /* CSS 变量 --chart-3 */
+  --chart-3: var(--color-green);
+  /* CSS 变量 --chart-4 */
+  --chart-4: var(--color-amber);
+  /* CSS 变量 --chart-5 */
+  --chart-5: var(--color-red);
+  /* CSS 变量 --sidebar */
+  --sidebar: var(--color-panel);
+  /* CSS 变量 --sidebar-foreground */
+  --sidebar-foreground: var(--color-ink);
+  /* CSS 变量 --sidebar-primary */
+  --sidebar-primary: var(--color-cyan);
+  /* CSS 变量 --sidebar-primary-foreground */
+  --sidebar-primary-foreground: #071018;
+  /* CSS 变量 --sidebar-accent */
+  --sidebar-accent: var(--accent);
+  /* CSS 变量 --sidebar-accent-foreground */
+  --sidebar-accent-foreground: var(--color-ink);
+  /* CSS 变量 --sidebar-border */
+  --sidebar-border: var(--color-line);
+  /* CSS 变量 --sidebar-ring */
+  --sidebar-ring: var(--color-cyan);
+}
+
+/* 按 data-theme 切换 Fluix 色板 */
+html[data-theme='light'] {
+  /* 页面底：略压深，拉开与白卡片的层次 */
+  --color-void: #e6ebf3;
+  --color-shell: #dde3ee;
+  --color-panel: #ffffff;
+  /* 槽位/芯片底：冷灰白，避免与 panel 糊成一片 */
+  --color-slot: #eef2f8;
+  --color-line: #c2cad8;
+  --color-line-bright: #96a3b8;
+  --color-ink: #121826;
+  /* 次要文字加深，保证可读 */
+  --color-muted: #4a566b;
+  --color-cyan: #0a7fa8;
+  --color-cyan-dim: #156f8c;
+  --color-fluix: #0f82a6;
+  --color-green: #178a4a;
+  --color-amber: #b06a0e;
+  --color-red: #c93b4c;
+  --app-on-surface-05: color-mix(in srgb, var(--color-ink) 5%, transparent);
+  --app-on-surface-08: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  --app-on-surface-12: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --primary-foreground: #f4fbff;
+  --scrollbar-track: color-mix(in srgb, var(--color-line) 36%, transparent);
+  --scrollbar-thumb: color-mix(in srgb, var(--color-line-bright) 48%, var(--color-cyan-dim));
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--color-cyan) 45%, var(--color-line-bright));
+  /* 玻璃面更实一点，减少「白糊糊」 */
+  --glass-bg: color-mix(in srgb, #ffffff 78%, var(--color-slot));
+  --glass-bg-strong: color-mix(in srgb, #ffffff 92%, var(--color-slot));
+  --glass-bg-soft: color-mix(in srgb, #ffffff 86%, var(--color-slot));
+  --glass-border: color-mix(in srgb, var(--color-ink) 20%, transparent);
+  --glass-border-bright: color-mix(in srgb, var(--color-cyan) 38%, var(--color-line));
+  --glass-highlight: color-mix(in srgb, #ffffff 80%, transparent);
+  --glass-shadow: 0 12px 32px color-mix(in srgb, #121826 16%, transparent), 0 4px 10px color-mix(in srgb, #121826 8%, transparent);
+  --glass-shadow-sm: 0 4px 14px color-mix(in srgb, #121826 12%, transparent), 0 1px 3px color-mix(in srgb, #121826 8%, transparent);
+  --glass-edge-dark: color-mix(in srgb, #121826 10%, transparent);
+  --glass-edge-light: color-mix(in srgb, #ffffff 70%, transparent);
+  --glass-hover-bg: #ffffff;
+  --glass-hover-shift: 0px;
+  --glass-hover-lift: 0 4px 14px color-mix(in srgb, #121826 12%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-cyan) 22%, transparent);
+  --glass-hover-glow: 0 0 10px color-mix(in srgb, var(--color-cyan) 10%, transparent);
+}
+
+/* 按 data-theme 切换 Fluix 色板 */
+html[data-theme='light'] .me-surface {
+  background-color: var(--color-void);
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -8%, color-mix(in srgb, #0a7fa8 12%, transparent), transparent 58%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, color-mix(in srgb, #0f82a6 7%, transparent), transparent 55%),
+    linear-gradient(to right, color-mix(in srgb, #aeb9cb 50%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, #aeb9cb 50%, transparent) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    18px 18px,
+    18px 18px;
+}
+
+/* 浅色：状态边框略提饱和 + 极淡底色，便于扫视区分，不过分抢戏 */
+html[data-theme='light'] .ui-glass-chip.ui-item-chip--item {
+  border-color: color-mix(in srgb, var(--color-green) 58%, var(--glass-border));
+  background: color-mix(in srgb, var(--color-green) 7%, var(--glass-bg-soft));
+}
+
+html[data-theme='light'] .ui-glass-chip.ui-item-chip--item:hover {
+  border-color: color-mix(in srgb, var(--color-green) 72%, var(--glass-border-bright));
+  background: color-mix(in srgb, var(--color-green) 10%, #ffffff);
+}
+
+html[data-theme='light'] .ui-glass-chip.ui-item-chip--fluid {
+  border-color: color-mix(in srgb, var(--color-cyan) 58%, var(--glass-border));
+  background: color-mix(in srgb, var(--color-cyan) 7%, var(--glass-bg-soft));
+}
+
+html[data-theme='light'] .ui-glass-chip.ui-item-chip--fluid:hover {
+  border-color: color-mix(in srgb, var(--color-cyan) 72%, var(--glass-border-bright));
+  background: color-mix(in srgb, var(--color-cyan) 10%, #ffffff);
+}
+
+html[data-theme='light'] .ui-glass-chip.ui-item-chip--other {
+  border-color: color-mix(in srgb, var(--color-muted) 52%, var(--glass-border));
+  background: color-mix(in srgb, var(--color-muted) 6%, var(--glass-bg-soft));
+}
+
+html[data-theme='light'] .ui-glass-chip.ui-item-chip--other:hover {
+  border-color: color-mix(in srgb, var(--color-muted) 68%, var(--glass-border-bright));
+  background: color-mix(in srgb, var(--color-muted) 9%, #ffffff);
+}
+
+html[data-theme='light'] .ui-glass-chip.ui-item-chip--crafting::before {
+  background: color-mix(in srgb, var(--color-amber) 18%, transparent);
+}
+
+html[data-theme='light'] .ui-tab {
+  color: color-mix(in srgb, var(--color-ink) 62%, var(--color-muted));
+}
+
+html[data-theme='light'] .ui-tab--active {
+  color: var(--color-ink);
+  border-color: color-mix(in srgb, var(--color-cyan) 45%, var(--color-line));
+  background: color-mix(in srgb, var(--color-cyan) 10%, #ffffff);
+}
+
+/* 按设置写入的字体预设切换 UI 字体（含 .mono / font-mono） */
+html[data-app-font='fusion-pixel'] {
+  --font-ui: 'Fusion Pixel', 'Segoe UI', 'Microsoft YaHei UI', sans-serif;
+  --font-mono: var(--font-ui);
+  --app-type-tracking: 0;
+}
+
+html[data-app-font='fusion-pixel'],
+html[data-app-font='fusion-pixel'] body,
+html[data-app-font='fusion-pixel'] #app {
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+}
+
+html[data-app-font='dm-sans'] {
+  --font-ui: 'DM Sans', 'Segoe UI', 'Microsoft YaHei UI', sans-serif;
+  --font-mono: var(--font-ui);
+}
+
+html[data-app-font='jetbrains-mono'] {
+  --font-ui: 'JetBrains Mono', 'Cascadia Mono', Consolas, monospace;
+  --font-mono: var(--font-ui);
+  --app-type-tracking: 0;
+}
+
+html[data-app-font='system'] {
+  --font-ui: 'Segoe UI', 'Microsoft YaHei UI', system-ui, sans-serif;
+  --font-mono: var(--font-ui);
+}
+
+/* 安全区：置于 @layer 外，避免被 Tailwind 工具类盖住 */
+html[data-platform='android'] {
+  --safe-top: max(env(safe-area-inset-top, 0px), 28px);
+  --safe-right: max(env(safe-area-inset-right, 0px), 0px);
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+  --safe-left: max(env(safe-area-inset-left, 0px), 0px);
+}
+
+.app-safe-header {
+  box-sizing: border-box;
+  padding-top: var(--safe-top);
+  min-height: calc(3rem + var(--safe-top));
+}
+
+.app-safe-dock {
+  bottom: max(0.75rem, var(--safe-bottom));
+  right: max(0.75rem, var(--safe-right));
+}
+
+/* 放入对应 CSS 层，控制优先级 */
+@layer base {
+  /* 样式声明 */
+  html,
+  /* 样式声明 */
+  body,
+  /* 样式规则：#app */
+  #app {
+    /* 样式规则：@apply m-0 h-full min-h-full bg-shell text-ink f */
+    @apply m-0 h-full min-h-full bg-shell text-ink font-ui antialiased;
+    /* 字距 */
+    letter-spacing: var(--app-type-tracking);
+    /* 声明属性 -webkit-font-smoothing */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 样式规则：html */
+  html {
+    /* 背景色 */
+    background-color: #10141b;
+  }
+
+  /* 禁止拖拽图片（图标预览等） */
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  /* 全局滚动条：Firefox + WebKit，颜色走 --scrollbar-* */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  *::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* 样式声明 */
+  button,
+  /* 样式声明 */
+  input,
+  /* 样式规则：select */
+  select {
+    /* 样式规则：@apply font-inherit text-inherit; */
+    @apply font-inherit text-inherit;
+  }
+
+  /* 样式规则：button */
+  button {
+    /* 样式规则：@apply cursor-pointer; */
+    @apply cursor-pointer;
+  }
+
+  /* 样式规则：code */
+  code {
+    @apply font-ui text-cyan;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+
+  /* 样式规则：::selection */
+  ::selection {
+    /* 背景 */
+    background: color-mix(in srgb, var(--color-cyan) 28%, transparent);
+  }
+}
+
+@layer components {
+  /*
+   * 彩虹走马灯：色停复制两遍；size 200% + 位移 0→100% = 平移一整段周期，无缝循环。
+   * 不按字拆 span，避免测宽/字距导致色带错位。
+   */
+  .ui-rainbow-title {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+    background-image: linear-gradient(
+      90deg,
+      var(--color-cyan),
+      var(--color-fluix),
+      var(--color-green),
+      var(--color-amber),
+      var(--color-red),
+      var(--color-cyan),
+      var(--color-fluix),
+      var(--color-green),
+      var(--color-amber),
+      var(--color-red),
+      var(--color-cyan)
+    );
+    background-size: 200% 100%;
+    background-repeat: repeat;
+    background-position: 0% 50%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: ui-rainbow-marquee 5s linear infinite;
+  }
+
+  @keyframes ui-rainbow-marquee {
+    from {
+      background-position: 0% 50%;
+    }
+    to {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* 列表区加载：贴顶细条，不占文档流 */
+  .ui-loading-bar {
+    pointer-events: none;
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: 10;
+    height: 2px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-cyan) 18%, transparent);
+  }
+
+  .ui-loading-bar::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 35%;
+    background: color-mix(in srgb, var(--color-cyan) 85%, white);
+    animation: ui-loading-slide 0.85s ease-in-out infinite;
+  }
+
+  @keyframes ui-loading-slide {
+    0% {
+      transform: translateX(-120%);
+    }
+    100% {
+      transform: translateX(320%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-rainbow-title {
+      animation: none !important;
+      background-position: 0% 50% !important;
+    }
+
+    .ui-loading-bar::after {
+      animation: none;
+      width: 100%;
+      opacity: 0.7;
+      transform: none;
+    }
+  }
+
+  html[data-motion='off'] .ui-rainbow-title {
+    animation: none !important;
+    background-position: 0% 50% !important;
+  }
+
+  html[data-motion='off'] .ui-loading-bar::after {
+    animation: none !important;
+    width: 100%;
+    opacity: 0.7;
+    transform: none;
+  }
+
+  /* 关闭动画：停用装饰性动画与过渡 */
+  html[data-motion='off'] *,
+  /* 关闭动画偏好：停用过渡与装饰动画 */
+  html[data-motion='off'] *::before,
+  /* 关闭动画偏好：停用过渡与装饰动画 */
+  html[data-motion='off'] *::after {
+    /* 动画 */
+    animation: none !important;
+    /* 过渡动画 */
+    transition: none !important;
+    /* 声明属性 scroll-behavior */
+    scroll-behavior: auto !important;
+  }
+
+  /* 弹层：遮罩淡入淡出（Vue Transition name=ui-overlay-fade） */
+  .ui-overlay-fade-enter-active,
+  .ui-overlay-fade-leave-active {
+    transition: opacity 0.2s ease;
+  }
+  .ui-overlay-fade-enter-from,
+  .ui-overlay-fade-leave-to {
+    opacity: 0;
+  }
+
+  /* 弹层：浮层弹出（下拉/状态面板）——与网络诊断同感 */
+  .ui-overlay-pop-enter-active,
+  .ui-overlay-pop-leave-active {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+  .ui-overlay-pop-enter-from,
+  .ui-overlay-pop-leave-to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.94);
+  }
+  .ui-overlay-pop-enter-to,
+  .ui-overlay-pop-leave-from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* 弹层：居中卡片（登录浮层等） */
+  .ui-overlay-scale-enter-active,
+  .ui-overlay-scale-leave-active {
+    transition:
+      opacity 0.22s ease,
+      transform 0.22s ease;
+  }
+  .ui-overlay-scale-enter-from,
+  .ui-overlay-scale-leave-to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  /* 列表换页 / 筛选结果切换 */
+  .ui-list-fade-enter-active,
+  .ui-list-fade-leave-active {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+  .ui-list-fade-enter-from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .ui-list-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  /* 主视图 / Tab 面板切换 */
+  .ui-view-fade-enter-active,
+  .ui-view-fade-leave-active {
+    transition:
+      opacity 0.22s ease,
+      transform 0.22s ease;
+  }
+  .ui-view-fade-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .ui-view-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  /* 应用级 UI 原子样式（非 shadcn 原语） */
+  .ui-label {
+    /* 声明属性 margin-bottom */
+    margin-bottom: 6px;
+    /* 布局显示方式 */
+    display: block;
+    /* 字号 */
+    font-size: 11px;
+    /* 字重 */
+    font-weight: 600;
+    /* 字距 */
+    letter-spacing: 0.02em;
+    /* 文字颜色 */
+    color: color-mix(in srgb, var(--color-ink) 72%, var(--color-muted));
+  }
+
+  /* 应用级 UI 原子样式（非 shadcn 原语） */
+  .ui-field {
+    height: 36px;
+    width: 100%;
+    border-radius: var(--app-radius-md);
+    border: 1px solid var(--glass-border);
+    background: linear-gradient(180deg, color-mix(in srgb, #000000 12%, transparent), transparent 55%), var(--glass-bg-soft);
+    padding-inline: 10px;
+    font-size: 13px;
+    box-shadow:
+      inset 0 2px 4px color-mix(in srgb, #000000 28%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #000000 18%, transparent),
+      inset 0 -1px 0 var(--glass-highlight);
+    backdrop-filter: blur(10px) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(10px) saturate(var(--glass-saturate));
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .ui-field:hover {
+    border-color: var(--glass-border-bright);
+    background: linear-gradient(180deg, color-mix(in srgb, #000000 8%, transparent), transparent 55%), var(--glass-bg);
+    box-shadow:
+      inset 0 2px 4px color-mix(in srgb, #000000 22%, transparent),
+      inset 0 -1px 0 var(--glass-highlight),
+      0 0 0 1px color-mix(in srgb, var(--color-cyan) 10%, transparent);
+  }
+
+  .ui-field:focus {
+    border-color: color-mix(in srgb, var(--color-cyan) 55%, var(--color-line));
+    box-shadow:
+      inset 0 2px 3px color-mix(in srgb, #000000 20%, transparent),
+      inset 0 -1px 0 var(--glass-highlight),
+      0 0 0 3px color-mix(in srgb, var(--color-cyan) 16%, transparent);
+    outline: none;
+  }
+
+  /* 数字框：隐藏系统步进器，改用 .ui-stepper */
+  input[type='number'].ui-no-spin {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  input[type='number'].ui-no-spin::-webkit-outer-spin-button,
+  input[type='number'].ui-no-spin::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .ui-stepper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 1px;
+    padding-inline: 1px;
+  }
+
+  .ui-stepper-btn {
+    display: inline-flex;
+    height: 11px;
+    width: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--color-muted);
+    padding: 0;
+    line-height: 1;
+    transition:
+      color 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .ui-stepper-btn:hover:not(:disabled) {
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-cyan-dim) 20%, transparent);
+  }
+
+  .ui-stepper-btn:disabled {
+    opacity: 0.4;
+  }
+
+  .ui-stepper-btn svg {
+    width: 0.7rem;
+    height: 0.7rem;
+  }
+
+  .ui-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    border-radius: var(--app-radius-md);
+    border: 1px solid var(--glass-border);
+    background: linear-gradient(180deg, color-mix(in srgb, #ffffff 8%, transparent), transparent 55%), var(--glass-bg-soft);
+    padding-inline: 10px;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: var(--app-type-tracking);
+    color: var(--color-muted);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      inset 0 -1px 0 color-mix(in srgb, #000000 18%, transparent),
+      0 2px 6px color-mix(in srgb, #000000 20%, transparent);
+    backdrop-filter: blur(12px) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(12px) saturate(var(--glass-saturate));
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.18s ease,
+      transform 0.18s ease;
+  }
+
+  .ui-btn:hover:not(:disabled) {
+    background: var(--glass-hover-bg);
+    border-color: var(--glass-border-bright);
+    color: var(--color-ink);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      var(--glass-hover-glow);
+    transform: translateY(calc(var(--glass-hover-shift) * -1));
+  }
+
+  .ui-btn:active:not(:disabled) {
+    transform: none;
+    box-shadow: inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* 应用级 UI 原子样式（非 shadcn 原语） */
+  .ui-btn:disabled {
+    /* 不透明度 */
+    opacity: 0.4;
+  }
+
+  /* 应用级 UI 原子样式（非 shadcn 原语） */
+  .ui-btn-primary {
+    height: 36px;
+    width: 100%;
+    border-radius: var(--app-radius-md);
+    border: 1px solid color-mix(in srgb, var(--color-cyan) 48%, transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, #2a9bb8 78%, transparent) 0%, color-mix(in srgb, #14586c 88%, transparent) 100%);
+    color: #effbff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: var(--app-type-tracking);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, #ffffff 28%, transparent),
+      0 6px 20px color-mix(in srgb, #0b3a48 35%, transparent);
+    backdrop-filter: blur(12px) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(12px) saturate(var(--glass-saturate));
+    transition:
+      filter 0.18s ease,
+      opacity 0.18s ease,
+      box-shadow 0.18s ease,
+      transform 0.18s ease;
+  }
+
+  /* 应用级 UI 原子样式（非 shadcn 原语） */
+  .ui-btn-primary:hover:not(:disabled) {
+    filter: brightness(1.08) saturate(1.05);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, #ffffff 34%, transparent),
+      0 4px 14px color-mix(in srgb, #0b3a48 30%, transparent),
+      var(--glass-hover-glow);
+    transform: translateY(calc(var(--glass-hover-shift) * -1));
+  }
+
+  .ui-btn-primary:active:not(:disabled) {
+    transform: none;
+    filter: brightness(1.02);
+  }
+
+  /* 应用级 UI 原子样式（非 shadcn 原语） */
+  .ui-btn-primary:disabled {
+    /* 鼠标指针 */
+    cursor: wait;
+    /* 不透明度 */
+    opacity: 0.55;
+  }
+
+  /* 应用级 UI 原子样式（非 shadcn 原语） */
+  .ui-title {
+    /* 外边距 */
+    margin: 0;
+    /* 字号 */
+    font-size: 15px;
+    /* 字重 */
+    font-weight: 600;
+    /* 字距 */
+    letter-spacing: -0.02em;
+    /* 行高 */
+    line-height: 1.3;
+  }
+
+  /* 应用级 UI 原子样式（非 shadcn 原语） */
+  .ui-subtitle {
+    /* 外边距 */
+    margin: 2px 0 0;
+    /* 字号 */
+    font-size: 12px;
+    /* 字重 */
+    font-weight: 400;
+    /* 文字颜色 */
+    color: var(--color-muted);
+    /* 字距 */
+    letter-spacing: -0.01em;
+  }
+
+  /* 液态玻璃面：半透明 + 模糊 + 顶缘高光 + 外投影 */
+  .ui-glass {
+    background: linear-gradient(180deg, color-mix(in srgb, #ffffff 7%, transparent), transparent 42%), var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      inset 0 -1px 0 var(--glass-edge-dark),
+      var(--glass-shadow-sm);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  }
+
+  .ui-glass-strong {
+    background: linear-gradient(165deg, color-mix(in srgb, #ffffff 9%, transparent) 0%, transparent 38%), var(--glass-bg-strong);
+    border: 1px solid color-mix(in srgb, var(--glass-border-bright) 40%, var(--glass-border));
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      inset 0 -1px 0 color-mix(in srgb, #000000 22%, transparent),
+      var(--glass-shadow);
+    backdrop-filter: blur(22px) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(22px) saturate(var(--glass-saturate));
+  }
+
+  /* 对话框面板：提高不透明度，避免被蒙层模糊「吃掉」 */
+  .ui-dialog-panel {
+    background: linear-gradient(165deg, color-mix(in srgb, #ffffff 10%, transparent) 0%, transparent 36%), color-mix(in srgb, var(--color-panel) 92%, transparent);
+    border-color: color-mix(in srgb, var(--glass-border-bright) 45%, var(--glass-border));
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      inset 0 -1px 0 color-mix(in srgb, #000000 28%, transparent),
+      0 0 0 1px color-mix(in srgb, #000000 35%, transparent),
+      0 18px 48px color-mix(in srgb, #000000 55%, transparent),
+      0 6px 16px color-mix(in srgb, #000000 35%, transparent);
+  }
+
+  .ui-glass-chip {
+    background: linear-gradient(180deg, color-mix(in srgb, #ffffff 6%, transparent), transparent 50%), var(--glass-bg-soft);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      inset 0 -1px 0 color-mix(in srgb, #000000 18%, transparent),
+      0 3px 10px color-mix(in srgb, #000000 22%, transparent);
+    backdrop-filter: blur(14px) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(14px) saturate(var(--glass-saturate));
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      transform 0.18s ease,
+      filter 0.18s ease;
+  }
+
+  .ui-glass-chip:hover {
+    background: linear-gradient(180deg, color-mix(in srgb, #ffffff 9%, transparent), transparent 55%), var(--glass-hover-bg);
+    border-color: var(--glass-border-bright);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      var(--glass-hover-lift),
+      var(--glass-hover-glow);
+    transform: translateY(calc(var(--glass-hover-shift) * -1));
+    filter: saturate(1.04);
+  }
+
+  .ui-glass-chip:active {
+    transform: none;
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      inset 0 2px 4px color-mix(in srgb, #000000 28%, transparent),
+      var(--glass-shadow-sm);
+  }
+
+  /*
+   * 库存格子状态边框（kind 注册表）：
+   * 物品=绿；流体=青；其他=灰；可合成=左侧宽条；零库存=虚线。
+   * 新增 kind 时同步补 ui-item-chip--* 与 craftable 宽条色。
+   */
+  .ui-glass-chip.ui-item-chip--item {
+    border-color: color-mix(in srgb, var(--color-green) 42%, var(--glass-border));
+  }
+
+  .ui-glass-chip.ui-item-chip--item:hover {
+    border-color: color-mix(in srgb, var(--color-green) 62%, var(--glass-border-bright));
+  }
+
+  .ui-glass-chip.ui-item-chip--fluid {
+    border-color: color-mix(in srgb, var(--color-cyan) 42%, var(--glass-border));
+  }
+
+  .ui-glass-chip.ui-item-chip--fluid:hover {
+    border-color: color-mix(in srgb, var(--color-cyan) 62%, var(--glass-border-bright));
+  }
+
+  .ui-glass-chip.ui-item-chip--other {
+    border-color: color-mix(in srgb, var(--color-muted) 42%, var(--glass-border));
+  }
+
+  .ui-glass-chip.ui-item-chip--other:hover {
+    border-color: color-mix(in srgb, var(--color-muted) 62%, var(--glass-border-bright));
+  }
+
+  .ui-glass-chip.ui-item-chip--empty {
+    border-style: dashed;
+  }
+
+  .ui-glass-chip.ui-item-chip--craftable {
+    --item-chip-rail: color-mix(in srgb, var(--color-green) 78%, transparent);
+    box-shadow:
+      inset 3px 0 0 0 var(--item-chip-rail),
+      inset 0 1px 0 var(--glass-highlight);
+  }
+
+  .ui-glass-chip.ui-item-chip--craftable.ui-item-chip--fluid {
+    --item-chip-rail: color-mix(in srgb, var(--color-cyan) 78%, transparent);
+  }
+
+  .ui-glass-chip.ui-item-chip--craftable.ui-item-chip--other {
+    --item-chip-rail: color-mix(in srgb, var(--color-muted) 78%, transparent);
+  }
+
+  /*
+   * 正在合成：背景从左到右按 --craft-progress 填充（琥珀色半透明）。
+   * 内容层抬高，避免被填充盖住；可与左侧宽条并存。
+   */
+  .ui-glass-chip.ui-item-chip--crafting {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .ui-glass-chip.ui-item-chip--crafting::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--craft-progress, 0%);
+    max-width: 100%;
+    background: color-mix(in srgb, var(--color-amber) 22%, transparent);
+    pointer-events: none;
+    z-index: 0;
+    transition: width 0.45s ease-out;
+  }
+
+  .ui-glass-chip.ui-item-chip--crafting > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ui-glass-chip.ui-item-chip--craftable:hover {
+    box-shadow:
+      inset 3px 0 0 0 color-mix(in srgb, var(--item-chip-rail) 100%, white 12%),
+      inset 0 1px 0 var(--glass-highlight),
+      var(--glass-hover-lift),
+      var(--glass-hover-glow);
+  }
+
+  .ui-glass-chip.ui-item-chip--craftable:active {
+    box-shadow:
+      inset 3px 0 0 0 var(--item-chip-rail),
+      inset 0 1px 0 var(--glass-highlight),
+      var(--glass-shadow-sm);
+  }
+
+  .ui-glass:hover {
+    border-color: var(--glass-border-bright);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      var(--glass-hover-lift);
+  }
+
+  .ui-glass-bar {
+    background: linear-gradient(180deg, color-mix(in srgb, #ffffff 8%, transparent), transparent 70%), color-mix(in srgb, var(--color-panel) 48%, transparent);
+    border-color: var(--glass-border);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      inset 0 -1px 0 color-mix(in srgb, #000000 22%, transparent),
+      0 4px 14px color-mix(in srgb, #000000 18%, transparent);
+    backdrop-filter: blur(20px) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(20px) saturate(var(--glass-saturate));
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .ui-glass,
+    .ui-glass-strong,
+    .ui-glass-chip,
+    .ui-glass-bar,
+    .ui-dialog-panel,
+    .ui-field,
+    .ui-btn {
+      background: var(--color-panel);
+    }
+  }
+
+  /* ME 控制器视觉表面：网格 + 光晕，衬托玻璃层 */
+  .me-surface {
+    background-color: #0e1218;
+    background-image:
+      radial-gradient(ellipse 90% 55% at 50% -8%, color-mix(in srgb, #5ad6ff 18%, transparent), transparent 58%),
+      radial-gradient(ellipse 45% 35% at 100% 100%, color-mix(in srgb, #1f7f9e 14%, transparent), transparent 55%),
+      linear-gradient(to right, color-mix(in srgb, #2a3342 30%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, #2a3342 30%, transparent) 1px, transparent 1px);
+    background-size:
+      auto,
+      auto,
+      18px 18px,
+      18px 18px;
+  }
+
+  .ui-tab {
+    height: 30px;
+    border-radius: var(--app-radius-md);
+    border: 1px solid transparent;
+    padding-inline: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-muted);
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.18s ease,
+      transform 0.18s ease;
+  }
+
+  .ui-tab:hover {
+    color: var(--color-ink);
+    background: var(--glass-hover-bg);
+    border-color: var(--glass-border-bright);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      var(--glass-hover-glow);
+    transform: translateY(calc(var(--glass-hover-shift) * -1));
+  }
+
+  .ui-tab--active {
+    color: var(--color-ink);
+    border-color: var(--glass-border-bright);
+    background: color-mix(in srgb, var(--color-cyan-dim) 22%, var(--glass-bg));
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      0 0 0 1px color-mix(in srgb, var(--color-cyan) 12%, transparent),
+      var(--glass-hover-glow);
+    backdrop-filter: blur(12px) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(12px) saturate(var(--glass-saturate));
+  }
+
+  .ui-tab--active:hover {
+    transform: none;
+    filter: brightness(1.04);
+  }
+
+  /* 边距充足时才允许轻微抬起；滚动/裁切容器强制归零 */
+  .ui-hover-room {
+    --glass-hover-shift: 1px;
+  }
+
+  .ui-hover-room-lg {
+    --glass-hover-shift: 2px;
+  }
+
+  .overflow-auto,
+  .overflow-hidden,
+  .overflow-x-auto,
+  .overflow-y-auto,
+  .overflow-scroll {
+    --glass-hover-shift: 0px;
+  }
+
+  /**
+   * 滚动边缘渐隐：由 ScrollFade 按 data-fade-* 开关上下遮罩，
+   * 无溢出时两端都不淡，避免短列表被无端削边。
+   */
+  .ui-scroll-fade {
+    --scroll-fade: 18px;
+    --fade-top: 0px;
+    --fade-bottom: 0px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent 100%);
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+  }
+
+  .ui-scroll-fade[data-fade-top='true'] {
+    --fade-top: var(--scroll-fade);
+  }
+
+  .ui-scroll-fade[data-fade-bottom='true'] {
+    --fade-bottom: var(--scroll-fade);
+  }
+
+  .ui-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  /* 缺失物品图标：MC 紫黑 2×2 棋盘 */
+  .ui-item-icon-placeholder {
+    box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--color-line) 55%, transparent);
+    background-image: linear-gradient(to right, #f800f8 50%, #2b2b2b 50%), linear-gradient(to right, #2b2b2b 50%, #f800f8 50%);
+    background-size: 100% 50%;
+    background-position:
+      0 0,
+      0 100%;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+  }
+
+  /*
+   * ME 物品槽：内凹井 + 外缘高光，接近库存格立体感。
+   * 配方预览 / 样板详情复用。
+   */
+  .ui-me-slot {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    border: 1px solid color-mix(in srgb, var(--color-line-bright) 55%, var(--glass-border));
+    background: linear-gradient(155deg, color-mix(in srgb, var(--color-panel) 55%, transparent) 0%, color-mix(in srgb, var(--color-slot) 88%, #000000) 100%);
+    box-shadow:
+      inset 0 2px 4px color-mix(in srgb, #000000 55%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, #ffffff 10%, transparent),
+      inset 1px 1px 0 color-mix(in srgb, #ffffff 8%, transparent),
+      0 1px 0 color-mix(in srgb, #ffffff 12%, transparent),
+      0 4px 10px color-mix(in srgb, #000000 32%, transparent);
+    outline: none;
+    transition:
+      border-color 0.16s ease,
+      box-shadow 0.16s ease,
+      transform 0.16s ease,
+      filter 0.16s ease;
+  }
+
+  .ui-me-slot::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 1px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, #000000 28%, transparent);
+  }
+
+  .ui-me-slot:hover {
+    border-color: var(--glass-border-bright);
+    transform: translateY(-1px);
+    filter: saturate(1.06) brightness(1.04);
+    box-shadow:
+      inset 0 2px 3px color-mix(in srgb, #000000 42%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, #ffffff 14%, transparent),
+      0 1px 0 color-mix(in srgb, #ffffff 16%, transparent),
+      0 6px 14px color-mix(in srgb, #000000 36%, transparent),
+      0 0 12px color-mix(in srgb, var(--color-cyan) 18%, transparent);
+  }
+
+  .ui-me-slot:active {
+    transform: translateY(0);
+    box-shadow:
+      inset 0 3px 6px color-mix(in srgb, #000000 62%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, #ffffff 6%, transparent),
+      0 1px 0 color-mix(in srgb, #ffffff 8%, transparent);
+  }
+
+  .ui-me-slot:focus-visible {
+    border-color: color-mix(in srgb, var(--color-cyan) 70%, var(--glass-border));
+    box-shadow:
+      inset 0 2px 4px color-mix(in srgb, #000000 50%, transparent),
+      0 0 0 2px color-mix(in srgb, var(--color-cyan) 35%, transparent),
+      0 4px 12px color-mix(in srgb, #000000 30%, transparent);
+  }
+
+  .ui-me-slot--output {
+    border-color: color-mix(in srgb, var(--color-cyan) 38%, var(--glass-border));
+    background: linear-gradient(155deg, color-mix(in srgb, var(--color-cyan) 14%, var(--color-panel)) 0%, color-mix(in srgb, var(--color-slot) 80%, #000000) 100%);
+    box-shadow:
+      inset 0 2px 4px color-mix(in srgb, #000000 48%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, var(--color-cyan) 22%, transparent),
+      0 1px 0 color-mix(in srgb, #ffffff 12%, transparent),
+      0 4px 12px color-mix(in srgb, #000000 30%, transparent),
+      0 0 10px color-mix(in srgb, var(--color-cyan) 14%, transparent);
+  }
+
+  .ui-me-slot--output:hover {
+    border-color: color-mix(in srgb, var(--color-cyan) 62%, var(--glass-border-bright));
+    box-shadow:
+      inset 0 2px 3px color-mix(in srgb, #000000 40%, transparent),
+      0 6px 16px color-mix(in srgb, #000000 34%, transparent),
+      0 0 16px color-mix(in srgb, var(--color-cyan) 28%, transparent);
+  }
+
+  .ui-me-slot--alt {
+    opacity: 0.72;
+    filter: saturate(0.92);
+  }
+
+  .ui-me-slot--static,
+  .ui-me-slot--static:hover,
+  .ui-me-slot--static:active {
+    transform: none;
+    filter: none;
+    pointer-events: none;
+  }
+
+  .ui-me-slot--static:hover {
+    border-color: color-mix(in srgb, var(--color-line-bright) 55%, var(--glass-border));
+    box-shadow:
+      inset 0 2px 4px color-mix(in srgb, #000000 55%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, #ffffff 10%, transparent),
+      inset 1px 1px 0 color-mix(in srgb, #ffffff 8%, transparent),
+      0 1px 0 color-mix(in srgb, #ffffff 12%, transparent),
+      0 4px 10px color-mix(in srgb, #000000 32%, transparent);
+  }
+
+  .ui-me-slot-amount {
+    pointer-events: none;
+    position: absolute;
+    right: 2px;
+    bottom: 1px;
+    z-index: 1;
+    border-radius: 3px;
+    padding: 1px 3px;
+    font-size: 10px;
+    line-height: 1;
+    color: var(--color-cyan);
+    background: color-mix(in srgb, var(--color-panel) 88%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-cyan) 28%, var(--glass-border));
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, #ffffff 18%, transparent),
+      0 1px 2px color-mix(in srgb, #000000 45%, transparent);
+    text-shadow: 0 1px 0 color-mix(in srgb, #000000 55%, transparent);
+  }
+
+  .ui-me-recipe-tray {
+    position: relative;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--color-line-bright) 40%, var(--glass-border));
+    padding: 12px 12px 11px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-panel) 42%, transparent) 0%, color-mix(in srgb, var(--color-slot) 70%, transparent) 100%);
+    box-shadow:
+      inset 0 2px 8px color-mix(in srgb, #000000 42%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, #ffffff 5%, transparent),
+      0 1px 0 color-mix(in srgb, #ffffff 10%, transparent),
+      0 8px 22px color-mix(in srgb, #000000 28%, transparent);
+  }
+
+  .ui-me-recipe-tray::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, color-mix(in srgb, #ffffff 6%, transparent), transparent 42%);
+  }
+
+  .ui-me-recipe-sep {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 1;
+    color: var(--color-muted);
+    background: color-mix(in srgb, var(--color-panel) 70%, transparent);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      0 2px 4px color-mix(in srgb, #000000 28%, transparent);
+  }
+
+  .ui-me-recipe-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: 999px;
+    color: var(--color-cyan);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--color-cyan) 18%, var(--color-panel)) 0%, color-mix(in srgb, var(--color-slot) 75%, #000000) 100%);
+    border: 1px solid color-mix(in srgb, var(--color-cyan) 35%, var(--glass-border));
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, #000000 30%, transparent),
+      0 3px 8px color-mix(in srgb, #000000 30%, transparent),
+      0 0 10px color-mix(in srgb, var(--color-cyan) 16%, transparent);
+  }
+}
+
+html[data-theme='light'] .ui-me-slot {
+  background: linear-gradient(155deg, #ffffff 0%, color-mix(in srgb, var(--color-slot) 88%, #c5cedd) 100%);
+  box-shadow:
+    inset 0 2px 4px color-mix(in srgb, #121826 14%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, #ffffff 80%, transparent),
+    0 1px 0 color-mix(in srgb, #ffffff 90%, transparent),
+    0 3px 8px color-mix(in srgb, #121826 12%, transparent);
+}
+
+html[data-theme='light'] .ui-me-slot:hover {
+  box-shadow:
+    inset 0 2px 3px color-mix(in srgb, #121826 10%, transparent),
+    0 5px 12px color-mix(in srgb, #121826 14%, transparent),
+    0 0 10px color-mix(in srgb, var(--color-cyan) 16%, transparent);
+}
+
+html[data-theme='light'] .ui-me-slot--output {
+  background: linear-gradient(155deg, color-mix(in srgb, var(--color-cyan) 10%, #ffffff) 0%, var(--color-slot) 100%);
+}
+
+html[data-theme='light'] .ui-me-recipe-tray {
+  background: linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--color-slot) 92%, #d5dbe8) 100%);
+  box-shadow:
+    inset 0 2px 6px color-mix(in srgb, #121826 8%, transparent),
+    inset 0 1px 0 #ffffff,
+    0 6px 16px color-mix(in srgb, #121826 10%, transparent);
+}
+
+html[data-theme='light'] .ui-dialog-panel {
+  background: linear-gradient(165deg, #ffffff 0%, color-mix(in srgb, var(--color-slot) 88%, #ffffff) 100%);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 0 0 1px color-mix(in srgb, #121826 8%, transparent),
+    0 16px 40px color-mix(in srgb, #121826 16%, transparent);
+}
+
+/* 注册可复用 Tailwind 工具类 */
+@utility font-inherit {
+  /* 声明属性 font */
+  font: inherit;
+}
+
+/* 数据/等宽数字：跟随设置字体，仅 tabular-nums */
+@utility mono {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* 声明设计 token / 主题扩展 */
+@theme inline {
+  /* CSS 变量 --font-heading */
+  --font-heading: var(--font-ui);
+  /* CSS 变量 --color-sidebar-ring */
+  --color-sidebar-ring: var(--sidebar-ring);
+  /* CSS 变量 --color-sidebar-border */
+  --color-sidebar-border: var(--sidebar-border);
+  /* CSS 变量 --color-sidebar-accent-foreground */
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  /* CSS 变量 --color-sidebar-accent */
+  --color-sidebar-accent: var(--sidebar-accent);
+  /* CSS 变量 --color-sidebar-primary-foreground */
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  /* CSS 变量 --color-sidebar-primary */
+  --color-sidebar-primary: var(--sidebar-primary);
+  /* CSS 变量 --color-sidebar-foreground */
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  /* CSS 变量 --color-sidebar */
+  --color-sidebar: var(--sidebar);
+  /* CSS 变量 --color-chart-5 */
+  --color-chart-5: var(--chart-5);
+  /* CSS 变量 --color-chart-4 */
+  --color-chart-4: var(--chart-4);
+  /* CSS 变量 --color-chart-3 */
+  --color-chart-3: var(--chart-3);
+  /* CSS 变量 --color-chart-2 */
+  --color-chart-2: var(--chart-2);
+  /* CSS 变量 --color-chart-1 */
+  --color-chart-1: var(--chart-1);
+  /* CSS 变量 --color-ring */
+  --color-ring: var(--ring);
+  /* CSS 变量 --color-input */
+  --color-input: var(--input);
+  /* CSS 变量 --color-border */
+  --color-border: var(--border);
+  /* CSS 变量 --color-destructive */
+  --color-destructive: var(--destructive);
+  /* CSS 变量 --color-accent-foreground */
+  --color-accent-foreground: var(--accent-foreground);
+  /* CSS 变量 --color-accent */
+  --color-accent: var(--accent);
+  /* CSS 变量 --color-muted-foreground */
+  --color-muted-foreground: var(--muted-foreground);
+  /* 保留 @theme 中 Fluix 的 --color-muted（正文次要色）；shadcn 面性 muted 用 secondary/slot */
+  --color-secondary-foreground: var(--secondary-foreground);
+  /* CSS 变量 --color-secondary */
+  --color-secondary: var(--secondary);
+  /* CSS 变量 --color-primary-foreground */
+  --color-primary-foreground: var(--primary-foreground);
+  /* CSS 变量 --color-primary */
+  --color-primary: var(--primary);
+  /* CSS 变量 --color-popover-foreground */
+  --color-popover-foreground: var(--popover-foreground);
+  /* CSS 变量 --color-popover */
+  --color-popover: var(--popover);
+  /* CSS 变量 --color-card-foreground */
+  --color-card-foreground: var(--card-foreground);
+  /* CSS 变量 --color-card */
+  --color-card: var(--card);
+  /* CSS 变量 --color-foreground */
+  --color-foreground: var(--foreground);
+  /* CSS 变量 --color-background */
+  --color-background: var(--background);
+  /* CSS 变量 --radius-sm */
+  --radius-sm: var(--app-radius-sm);
+  /* CSS 变量 --radius-md */
+  --radius-md: var(--app-radius-md);
+  /* CSS 变量 --radius-lg */
+  --radius-lg: var(--app-radius-lg);
+  /* CSS 变量 --radius-xl */
+  --radius-xl: calc(var(--app-radius-lg) + 4px);
+}
+
+/* .dark 与 data-theme 由 settings store 同步；token 已在 :root 映射 Fluix */
+
+/* 放入对应 CSS 层，控制优先级 */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+}
