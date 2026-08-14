@@ -159,7 +159,7 @@ function itemChipClass(item: Item) {
   return cn(
     'ui-glass-chip ui-hover-room text-left',
     compact.value
-      ? 'relative inline-flex size-[3.25rem] items-center justify-center overflow-hidden rounded-[8px] p-1'
+      ? 'relative inline-flex size-[3.25rem] items-center justify-center overflow-hidden rounded-[8px] p-0'
       : 'grid min-h-[76px] min-w-[140px] gap-0.5 rounded-[8px] p-2.5',
     ITEM_KIND_META[kindId].chipMod,
     item.craftable && 'ui-item-chip--craftable',
@@ -245,6 +245,7 @@ function onCraftSubmitted() {
   confirmOpen.value = false
   planInfo.value = null
   onDetailOpen(false)
+  void craftJobs.refresh()
 }
 
 /** REST 兜底：WS 不可用或用户点查询 */
@@ -362,11 +363,13 @@ onUnmounted(() => {
                 <TooltipTrigger as-child>
                   <button type="button" :class="itemChipClass(item)" :style="craftProgressStyle(item)" :aria-busy="true" :aria-label="itemLabel(item)" @click="openDetail(item)">
                     <template v-if="compact">
-                      <ItemIcon :item="item" :size="28" flush class="relative z-[1] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]" />
+                      <ItemIcon :item="item" flush class="relative z-[1] drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]" />
                       <span class="ui-me-slot-amount mono max-w-[90%] truncate">{{ formatStackAmount(item) }}</span>
                     </template>
                     <div v-else class="flex items-start gap-2">
-                      <ItemIcon :item="item" :size="28" />
+                      <span class="inline-block size-7 shrink-0">
+                        <ItemIcon :item="item" />
+                      </span>
                       <div class="min-w-0 flex-1 grid gap-0.5">
                         <strong class="truncate text-[12.5px] font-medium tracking-[-0.01em]">
                           <McFormattedText :text="item.displayName" />
@@ -394,11 +397,13 @@ onUnmounted(() => {
                 <TooltipTrigger as-child>
                   <button type="button" :class="itemChipClass(item)" :style="craftProgressStyle(item)" :aria-label="itemLabel(item)" @click="openDetail(item)">
                     <template v-if="compact">
-                      <ItemIcon :item="item" :size="28" flush class="relative z-[1] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]" />
+                      <ItemIcon :item="item" flush class="relative z-[1] drop-shadow-[0_1px_1px_rgba(0,0,0,0.35)]" />
                       <span class="ui-me-slot-amount mono max-w-[90%] truncate">{{ formatStackAmount(item) }}</span>
                     </template>
                     <div v-else class="flex items-start gap-2">
-                      <ItemIcon :item="item" :size="28" />
+                      <span class="inline-block size-7 shrink-0">
+                        <ItemIcon :item="item" />
+                      </span>
                       <div class="min-w-0 flex-1 grid gap-0.5">
                         <strong class="truncate text-[12.5px] font-medium tracking-[-0.01em]">
                           <McFormattedText :text="item.displayName" />
@@ -428,10 +433,12 @@ onUnmounted(() => {
 
     <AppPagination v-model:page="page" v-model:page-size="pageSize" :total="total" @change="onPaginationChange" />
 
-    <AppDialog :open="detailOpen" :class="canCraft ? 'min-w-[18rem] max-w-[min(100%-1.5rem,22rem)] sm:max-w-[22rem]' : undefined" @update:open="onDetailOpen">
+    <AppDialog :open="detailOpen" prevent-open-focus :class="canCraft ? 'min-w-[18rem] max-w-[min(100%-1.5rem,22rem)] sm:max-w-[22rem]' : undefined" @update:open="onDetailOpen">
       <template #header>
         <div class="flex items-center gap-2 pr-7">
-          <ItemIcon v-if="selected" :item="selected" :size="36" />
+          <span v-if="selected" class="inline-block size-9 shrink-0">
+            <ItemIcon :item="selected" />
+          </span>
           <div class="min-w-0">
             <h2 class="m-0 text-[13px] font-semibold tracking-[-0.02em]">
               <McFormattedText v-if="selected" :text="selected.displayName" />

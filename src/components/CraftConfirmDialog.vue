@@ -115,7 +115,9 @@ function modeLabel(mode?: string) {
   >
     <template #header>
       <div class="flex items-center gap-2 pr-7">
-        <ItemIcon v-if="viewPlan?.output" :item="viewPlan.output" :size="36" />
+        <span v-if="viewPlan?.output" class="inline-block size-9 shrink-0">
+          <ItemIcon :item="viewPlan.output" />
+        </span>
         <div class="min-w-0">
           <h2 class="m-0 text-[13px] font-semibold tracking-[-0.02em]">
             <template v-if="viewPlan?.output">
@@ -128,8 +130,8 @@ function modeLabel(mode?: string) {
     </template>
 
     <template v-if="viewPlan">
-      <div class="grid max-h-[min(80vh,48rem)] gap-1.5 overflow-y-auto">
-        <div class="grid gap-1 text-[12px]">
+      <div class="flex h-full min-h-0 flex-1 flex-col gap-1.5 overflow-hidden">
+        <div class="grid shrink-0 gap-1 text-[12px]">
           <p class="mono m-0">
             {{ t('craft.bytes', { bytes: viewPlan.bytes }) }}
             <span class="text-muted"> / {{ t('craft.bytesAvailable', { bytes: viewPlan.bytesAvailable }) }}</span>
@@ -142,28 +144,33 @@ function modeLabel(mode?: string) {
           <p v-if="viewPlan.warning" class="m-0 text-amber">{{ viewPlan.warning }}</p>
         </div>
 
-        <label class="mt-1 grid gap-1">
+        <label class="grid shrink-0 gap-1">
           <span class="text-xs text-muted">{{ t('craft.selectCpu') }}</span>
           <AppSelect v-model="selectedCpu" compact :options="cpuOptions" :aria-label="t('craft.selectCpu')" />
         </label>
 
-        <div v-if="viewPlan.missing.length" class="mt-1 text-[12px] text-amber">
-          <strong>{{ t('craft.missing') }}</strong>
-          <ul class="mt-1 list-none space-y-1 pl-0">
+        <div v-if="viewPlan.missing.length" class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden text-[12px] text-amber">
+          <strong class="shrink-0">{{ t('craft.missing') }}</strong>
+          <ul class="m-0 min-h-0 list-none flex-1 space-y-1 overflow-y-auto overscroll-contain pl-0">
             <li v-for="m in viewPlan.missing" :key="m.key" class="flex items-center gap-2">
-              <ItemIcon :item="m" :size="16" />
-              <span><McFormattedText :text="m.displayName" /> × {{ formatStackAmount(m) }}</span>
+              <span class="inline-block size-4 shrink-0">
+                <ItemIcon :item="m" />
+              </span>
+              <span class="min-w-0 truncate"><McFormattedText :text="m.displayName" /> × {{ formatStackAmount(m) }}</span>
             </li>
           </ul>
         </div>
 
-        <div v-if="viewPlan.tree" class="mt-1.5 border-t border-line pt-2">
-          <div class="h-[min(45vh,24rem)] min-h-[12rem] w-full overflow-hidden rounded-md border border-line">
+        <div v-if="viewPlan.tree" class="shrink-0 border-t border-line pt-2" :class="viewPlan.missing.length ? undefined : 'min-h-0 flex-1'">
+          <div
+            class="w-full overflow-hidden rounded-md border border-line"
+            :class="viewPlan.missing.length ? 'h-[min(36vh,18rem)] min-h-[10rem]' : 'h-full min-h-[12rem] max-h-[min(45vh,24rem)]'"
+          >
             <CraftRecipeTree :node="viewPlan.tree" :mode-label="modeLabel" />
           </div>
         </div>
 
-        <p v-if="message" class="m-0 text-xs text-red">{{ message }}</p>
+        <p v-if="message" class="m-0 shrink-0 text-xs text-red">{{ message }}</p>
       </div>
     </template>
 

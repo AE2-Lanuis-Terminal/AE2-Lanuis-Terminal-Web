@@ -35,7 +35,9 @@ function quantityLabel(job: (typeof pinnedBusyJobs.value)[number]) {
         :key="toast.id"
         class="ui-glass-chip flex items-start gap-2.5 rounded-[10px] border border-[color:var(--glass-border-bright)] px-3 py-2.5 shadow-[0_8px_28px_rgba(0,0,0,0.28)]"
       >
-        <ItemIcon v-if="toast.output" :item="toast.output" :size="28" class="mt-0.5" />
+        <span v-if="toast.output" class="mt-0.5 inline-block size-7 shrink-0">
+          <ItemIcon :item="toast.output" />
+        </span>
         <div class="min-w-0 flex-1">
           <p class="m-0 text-[12px] font-medium text-ink">{{ t('jobs.completeToast') }}</p>
           <p class="mono m-0 mt-0.5 truncate text-[11px] text-muted">
@@ -74,7 +76,9 @@ function quantityLabel(job: (typeof pinnedBusyJobs.value)[number]) {
       <div v-show="!dockCollapsed" class="max-h-[40vh] space-y-2.5 overflow-auto px-3 py-2.5">
         <article v-for="job in pinnedBusyJobs" :key="job.cpuName" class="min-w-0">
           <div class="flex items-center gap-2">
-            <ItemIcon v-if="job.output" :item="job.output" :size="24" />
+            <span v-if="job.output" class="inline-block size-6 shrink-0">
+              <ItemIcon :item="job.output" />
+            </span>
             <div class="min-w-0 flex-1">
               <p class="m-0 truncate text-[12px] text-ink">{{ label(job) }}</p>
               <p class="mono m-0 truncate text-[10px] text-muted">{{ job.cpuName }}</p>

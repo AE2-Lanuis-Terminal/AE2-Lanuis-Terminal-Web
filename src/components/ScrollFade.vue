@@ -66,7 +66,12 @@ onBeforeUnmount(() => {
   ro?.disconnect()
 })
 
-defineExpose({ update, scrollToTop })
+defineExpose({
+  update,
+  scrollToTop,
+  /** 实际产生滚动的节点（外层仅布局） */
+  getScrollEl: () => root.value,
+})
 </script>
 
 <template>

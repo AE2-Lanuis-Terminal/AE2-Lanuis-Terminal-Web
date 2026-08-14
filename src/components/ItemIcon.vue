@@ -1,5 +1,6 @@
 <!--
-  ME 物品图标：固定正方形槽，避免列表 flex/grid 把图挤瘦（preflight 的 max-width:100% + height:auto）。
+  ME 物品图标：铺满上层容器；勿在此设宽高（由父级定尺寸）。
+  object-contain + 取消 preflight 的 max-width 压缩，避免被挤扁。
 -->
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
@@ -11,11 +12,10 @@ import { cn } from '@/lib/utils'
 const props = withDefaults(
   defineProps<{
     item: Pick<Item, 'id' | 'iconUrl' | 'displayName' | 'isFluid'>
-    size?: number
     /** 贴边填满格子时去掉圆角 */
     flush?: boolean
   }>(),
-  { size: 32, flush: false },
+  { flush: false },
 )
 
 const src = ref(resolveItemIconUrl(props.item))
@@ -23,10 +23,6 @@ const failed = ref(false)
 
 const showPlaceholder = computed(() => failed.value || isItemIconPlaceholder(src.value))
 const label = computed(() => stripMcFormat(props.item.displayName) || props.item.id)
-const boxStyle = computed(() => {
-  const px = `${props.size}px`
-  return { width: px, height: px, minWidth: px, minHeight: px }
-})
 
 watch(
   () => [props.item.id, props.item.iconUrl, props.item.isFluid] as const,
@@ -44,14 +40,12 @@ function onError() {
 </script>
 
 <template>
-  <span class="inline-flex shrink-0 overflow-hidden" :class="flush ? 'rounded-none' : 'rounded-sm'" :style="boxStyle" role="img" :aria-label="label">
+  <span :class="cn('block size-full min-h-0 min-w-0 overflow-hidden', flush ? 'rounded-none' : 'rounded-sm')" role="img" :aria-label="label">
     <span v-if="showPlaceholder" class="ui-item-icon-placeholder block size-full" />
     <img
       v-else
       :src="src"
       :alt="label"
-      :width="size"
-      :height="size"
       draggable="false"
       loading="lazy"
       decoding="async"

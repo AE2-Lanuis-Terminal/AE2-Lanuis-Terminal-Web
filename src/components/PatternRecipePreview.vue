@@ -14,8 +14,8 @@ defineProps<{
 
 const { t } = useI18n()
 
-/** 与主槽垂直居中（主槽约 40px） */
-const sepWrap = 'mt-[10px] shrink-0 self-start'
+/** 与材料槽垂直居中 */
+const sepWrap = 'shrink-0 self-center'
 </script>
 
 <template>

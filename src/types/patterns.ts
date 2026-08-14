@@ -44,9 +44,16 @@ export interface Pattern {
   id: string
   /** 编码样板悬停名（砧重命名 / 彩色显示名），可含 § 颜色码 */
   name: string
+  /** 工作模式：crafting / processing / … */
   mode: PatternMode | string
   /** 在供应器 patternInv 中的下标 */
   slotIndex?: number
+  /** 编码人（NBT 可选） */
+  encoder?: string
+  /** 原版/数据包配方 ID */
+  recipeId?: string
+  /** 有序 / 无序（crafting 模式） */
+  craftingShape?: 'shaped' | 'shapeless' | string
   primaryOutput: Item
   outputs: Item[]
   inputs: PatternInput[]

@@ -974,6 +974,12 @@ html[data-platform='android'] {
     z-index: 1;
   }
 
+  /* 数量角标须保持 absolute，勿被上行 relative 顶到格心偏右 */
+  .ui-glass-chip.ui-item-chip--crafting > .ui-me-slot-amount {
+    position: absolute;
+    z-index: 2;
+  }
+
   .ui-glass-chip.ui-item-chip--craftable:hover {
     box-shadow:
       inset 3px 0 0 0 color-mix(in srgb, var(--item-chip-rail) 100%, white 12%),
@@ -1146,6 +1152,7 @@ html[data-platform='android'] {
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
     border-radius: 7px;
     border: 1px solid color-mix(in srgb, var(--color-line-bright) 55%, var(--glass-border));
     background: linear-gradient(155deg, color-mix(in srgb, var(--color-panel) 55%, transparent) 0%, color-mix(in srgb, var(--color-slot) 88%, #000000) 100%);

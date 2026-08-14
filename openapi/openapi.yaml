@@ -15,12 +15,12 @@ paths:
       operationId: health
       summary: 健康检查与 WebSocket 发现
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthResponse"
+                $ref: '#/components/schemas/HealthResponse'
 
   /api/v1/auth/login:
     post:
@@ -31,14 +31,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LoginRequest"
+              $ref: '#/components/schemas/LoginRequest'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
+                $ref: '#/components/schemas/LoginResponse'
 
   /api/v1/auth/logout:
     post:
@@ -47,12 +47,12 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OkResult"
+                $ref: '#/components/schemas/OkResult'
 
   /api/v1/auth/session:
     get:
@@ -61,12 +61,12 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionResponse"
+                $ref: '#/components/schemas/SessionResponse'
 
   /api/v1/admin/bindings:
     get:
@@ -78,15 +78,15 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AdminBindingsResponse"
-        "401":
+                $ref: '#/components/schemas/AdminBindingsResponse'
+        '401':
           description: 未登录
-        "403":
+        '403':
           description: 非管理员
 
   /api/v1/admin/session/act-as:
@@ -105,15 +105,15 @@ paths:
               properties:
                 playerUuid: { type: string, format: uuid }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionResponse"
-        "403":
+                $ref: '#/components/schemas/SessionResponse'
+        '403':
           description: 非管理员
-        "503":
+        '503':
           description: 网络不可达或离线
 
   /api/v1/admin/session/clear-act-as:
@@ -123,12 +123,12 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OkResult"
+                $ref: '#/components/schemas/OkResult'
 
   /api/v1/admin/audit:
     get:
@@ -137,17 +137,17 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/q"
-        - $ref: "#/components/parameters/page"
-        - $ref: "#/components/parameters/pageSize"
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AdminAuditResponse"
-        "403":
+                $ref: '#/components/schemas/AdminAuditResponse'
+        '403':
           description: 非管理员
 
   /api/v1/items:
@@ -157,7 +157,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/q"
+        - $ref: '#/components/parameters/q'
         - name: kind
           in: query
           schema: { type: string, enum: [all, item, fluid, other] }
@@ -170,15 +170,15 @@ paths:
         - name: order
           in: query
           schema: { type: string, enum: [asc, desc] }
-        - $ref: "#/components/parameters/page"
-        - $ref: "#/components/parameters/pageSize"
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ItemsResponse"
+                $ref: '#/components/schemas/ItemsResponse'
 
   /api/v1/patterns:
     get:
@@ -187,7 +187,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/q"
+        - $ref: '#/components/parameters/q'
         - name: qOutput
           in: query
           schema: { type: string }
@@ -197,15 +197,15 @@ paths:
         - name: mode
           in: query
           schema: { type: string }
-        - $ref: "#/components/parameters/page"
-        - $ref: "#/components/parameters/pageSize"
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PatternsResponse"
+                $ref: '#/components/schemas/PatternsResponse'
 
   /api/v1/pattern-providers:
     get:
@@ -217,7 +217,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/q"
+        - $ref: '#/components/parameters/q'
         - name: qOutput
           in: query
           schema: { type: string }
@@ -228,12 +228,12 @@ paths:
           in: query
           schema: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PatternProvidersResponse"
+                $ref: '#/components/schemas/PatternProvidersResponse'
 
   /api/v1/patterns/move:
     post:
@@ -250,20 +250,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatternMoveRequest"
+              $ref: '#/components/schemas/PatternMoveRequest'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OkResult"
-        "400":
+                $ref: '#/components/schemas/OkResult'
+        '400':
           description: 校验失败（槽空/目标满/供应器不存在等）
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorBody"
+                $ref: '#/components/schemas/ErrorBody'
 
   /api/v1/crafting/catalog:
     get:
@@ -272,19 +272,19 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/q"
+        - $ref: '#/components/parameters/q'
         - name: sort
           in: query
           schema: { type: string }
-        - $ref: "#/components/parameters/page"
-        - $ref: "#/components/parameters/pageSize"
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PageItem"
+                $ref: '#/components/schemas/PageItem'
 
   /api/v1/crafting/plan:
     post:
@@ -297,14 +297,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CraftPlanRequest"
+              $ref: '#/components/schemas/CraftPlanRequest'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CraftPlanResponse"
+                $ref: '#/components/schemas/CraftPlanResponse'
 
   /api/v1/crafting/submit:
     post:
@@ -317,14 +317,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CraftSubmitRequest"
+              $ref: '#/components/schemas/CraftSubmitRequest'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CraftSubmitResponse"
+                $ref: '#/components/schemas/CraftSubmitResponse'
 
   /api/v1/crafting/jobs:
     get:
@@ -333,12 +333,12 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CraftJobsResponse"
+                $ref: '#/components/schemas/CraftJobsResponse'
 
   /api/v1/crafting/cancel:
     post:
@@ -351,14 +351,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CraftCancelRequest"
+              $ref: '#/components/schemas/CraftCancelRequest'
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OkResult"
+                $ref: '#/components/schemas/OkResult'
 
   /api/v1/icons/{kind}/{ns}/{path}:
     get:
@@ -383,11 +383,11 @@ paths:
           style: simple
           explode: false
       responses:
-        "200":
+        '200':
           description: PNG 字节
           content:
             image/png: {}
-        "404":
+        '404':
           description: 预烘焙文件不存在
     head:
       operationId: itemIconHead
@@ -406,9 +406,9 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        "200":
+        '200':
           description: 存在
-        "404":
+        '404':
           description: 不存在
 
 components:
@@ -452,20 +452,20 @@ components:
       required: [enabled, port, pushIntervalMs]
       properties:
         enabled: { type: boolean }
-        port: { type: integer, description: "对外 WS 端口；与 HTTP 相同时表示单端口分流" }
+        port: { type: integer, description: '对外 WS 端口；与 HTTP 相同时表示单端口分流' }
         pushIntervalMs: { type: integer }
         running: { type: boolean }
-        sameAsHttp: { type: boolean, description: "true 时与 http.port 相同（默认）" }
+        sameAsHttp: { type: boolean, description: 'true 时与 http.port 相同（默认）' }
 
     HealthResponse:
       type: object
       required: [ok, service, version]
       properties:
         ok: { type: boolean }
-        service: { type: string, description: "必须为 ae2lanuis" }
+        service: { type: string, description: '必须为 ae2lanuis' }
         version: { type: string }
         sessions: { type: integer }
-        websocket: { $ref: "#/components/schemas/WebsocketInfo" }
+        websocket: { $ref: '#/components/schemas/WebsocketInfo' }
 
     LoginRequest:
       type: object
@@ -483,7 +483,7 @@ components:
         account: { type: string }
         token: { type: string }
         displayName: { type: string }
-        admin: { type: boolean, description: "是否达到 Web 管理权限（OP）" }
+        admin: { type: boolean, description: '是否达到 Web 管理权限（OP）' }
 
     SessionResponse:
       type: object
@@ -491,9 +491,9 @@ components:
       properties:
         authenticated: { type: boolean }
         account: { type: string }
-        admin: { type: boolean, description: "已登录时是否为管理员" }
+        admin: { type: boolean, description: '已登录时是否为管理员' }
         actingAs:
-          $ref: "#/components/schemas/ActingAsInfo"
+          $ref: '#/components/schemas/ActingAsInfo'
 
     ActingAsInfo:
       type: object
@@ -515,13 +515,13 @@ components:
       properties:
         playerUuid: { type: string }
         playerName: { type: string }
-        updatedAt: { type: integer, description: "Unix 秒" }
-        playerOnline: { type: boolean, description: "玩家当前是否在服务器内" }
+        updatedAt: { type: integer, description: 'Unix 秒' }
+        playerOnline: { type: boolean, description: '玩家当前是否在服务器内' }
         hasNetworkLink: { type: boolean }
-        endpoint: { $ref: "#/components/schemas/AdminEndpoint" }
-        networkAvailable: { type: boolean, description: "能否从保存的链接解析 IGrid" }
-        networkOnline: { type: boolean, description: "AE 网络是否通电" }
-        itemTypes: { type: integer, description: "库存种类；轻量探测时可能为 -1" }
+        endpoint: { $ref: '#/components/schemas/AdminEndpoint' }
+        networkAvailable: { type: boolean, description: '能否从保存的链接解析 IGrid' }
+        networkOnline: { type: boolean, description: 'AE 网络是否通电' }
+        itemTypes: { type: integer, description: '库存种类；轻量探测时可能为 -1' }
         cpuCount: { type: integer }
         busyCpuCount: { type: integer }
 
@@ -533,13 +533,13 @@ components:
         total: { type: integer }
         bindings:
           type: array
-          items: { $ref: "#/components/schemas/AdminBinding" }
+          items: { $ref: '#/components/schemas/AdminBinding' }
 
     AuditEntry:
       type: object
       required: [ts, action]
       properties:
-        ts: { type: integer, description: "epoch ms" }
+        ts: { type: integer, description: 'epoch ms' }
         action: { type: string }
         actorUuid: { type: string }
         actorName: { type: string }
@@ -557,7 +557,7 @@ components:
         total: { type: integer }
         entries:
           type: array
-          items: { $ref: "#/components/schemas/AuditEntry" }
+          items: { $ref: '#/components/schemas/AuditEntry' }
 
     Item:
       type: object
@@ -571,7 +571,7 @@ components:
         kind: { type: string }
         isFluid: { type: boolean, deprecated: true }
         amountPerUnit: { type: number }
-        iconUrl: { type: string, description: "相对路径，如 /api/v1/icons/item/minecraft/stone；对应预烘焙 PNG" }
+        iconUrl: { type: string, description: '相对路径，如 /api/v1/icons/item/minecraft/stone；对应预烘焙 PNG' }
 
     NetworkSummary:
       type: object
@@ -591,15 +591,15 @@ components:
         total: { type: integer }
         items:
           type: array
-          items: { $ref: "#/components/schemas/Item" }
+          items: { $ref: '#/components/schemas/Item' }
 
     ItemsResponse:
       allOf:
-        - $ref: "#/components/schemas/PageItem"
+        - $ref: '#/components/schemas/PageItem'
         - type: object
           required: [network]
           properties:
-            network: { $ref: "#/components/schemas/NetworkSummary" }
+            network: { $ref: '#/components/schemas/NetworkSummary' }
             contentRevision: { type: integer }
 
     PatternProviderTarget:
@@ -625,40 +625,46 @@ components:
           type: object
           additionalProperties: true
         priority: { type: integer }
-        slotCount: { type: integer, description: "样板库存槽位数（vanilla Pattern Provider = 9）" }
-        usedSlots: { type: integer, description: "已占用槽位数" }
-        movable: { type: boolean, description: "是否支持槽位读写移动（PatternProviderLogic）" }
+        slotCount: { type: integer, description: '样板库存槽位数（vanilla Pattern Provider = 9）' }
+        usedSlots: { type: integer, description: '已占用槽位数' }
+        movable: { type: boolean, description: '是否支持槽位读写移动（PatternProviderLogic）' }
         targets:
           type: array
-          items: { $ref: "#/components/schemas/PatternProviderTarget" }
+          items: { $ref: '#/components/schemas/PatternProviderTarget' }
 
     PatternInput:
       type: object
       properties:
-        item: { $ref: "#/components/schemas/Item" }
+        item: { $ref: '#/components/schemas/Item' }
         multiplier: { type: string }
         alternatives:
           type: array
-          items: { $ref: "#/components/schemas/Item" }
+          items: { $ref: '#/components/schemas/Item' }
 
     Pattern:
       type: object
       properties:
         id: { type: string }
         name: { type: string }
-        mode: { type: string }
-        slotIndex: { type: integer, description: "在供应器 patternInv 中的下标" }
-        primaryOutput: { $ref: "#/components/schemas/Item" }
+        mode: { type: string, description: '工作模式：crafting / processing / smithing / stonecutting / other' }
+        slotIndex: { type: integer, description: '在供应器 patternInv 中的下标' }
+        encoder: { type: string, description: '编码人（样板物品 NBT 可选字段，无则省略）' }
+        recipeId: { type: string, description: '原版/数据包配方 ID（工作台样板常见）' }
+        craftingShape:
+          type: string
+          enum: [shaped, shapeless]
+          description: '有序/无序合成（仅 crafting 模式可能有）'
+        primaryOutput: { $ref: '#/components/schemas/Item' }
         outputs:
           type: array
-          items: { $ref: "#/components/schemas/Item" }
+          items: { $ref: '#/components/schemas/Item' }
         inputs:
           type: array
-          items: { $ref: "#/components/schemas/PatternInput" }
+          items: { $ref: '#/components/schemas/PatternInput' }
         substitute: { type: boolean }
         substituteFluids: { type: boolean }
-        definition: { $ref: "#/components/schemas/Item" }
-        provider: { $ref: "#/components/schemas/PatternProvider" }
+        definition: { $ref: '#/components/schemas/Item' }
+        provider: { $ref: '#/components/schemas/PatternProvider' }
 
     PatternSlot:
       type: object
@@ -667,18 +673,18 @@ components:
         index: { type: integer }
         pattern:
           allOf:
-            - $ref: "#/components/schemas/Pattern"
+            - $ref: '#/components/schemas/Pattern'
           nullable: true
 
     PatternProviderBoard:
       allOf:
-        - $ref: "#/components/schemas/PatternProvider"
+        - $ref: '#/components/schemas/PatternProvider'
         - type: object
           required: [slots]
           properties:
             slots:
               type: array
-              items: { $ref: "#/components/schemas/PatternSlot" }
+              items: { $ref: '#/components/schemas/PatternSlot' }
 
     PatternProvidersResponse:
       type: object
@@ -687,7 +693,7 @@ components:
         ok: { type: boolean }
         providers:
           type: array
-          items: { $ref: "#/components/schemas/PatternProviderBoard" }
+          items: { $ref: '#/components/schemas/PatternProviderBoard' }
 
     PatternSlotRef:
       type: object
@@ -701,14 +707,14 @@ components:
       required: [providerId]
       properties:
         providerId: { type: string }
-        slotIndex: { type: integer, description: "省略则填第一个空槽" }
+        slotIndex: { type: integer, description: '省略则填第一个空槽' }
 
     PatternMoveOp:
       type: object
       required: [from, to]
       properties:
-        from: { $ref: "#/components/schemas/PatternSlotRef" }
-        to: { $ref: "#/components/schemas/PatternMoveTarget" }
+        from: { $ref: '#/components/schemas/PatternSlotRef' }
+        to: { $ref: '#/components/schemas/PatternMoveTarget' }
 
     PatternMoveRequest:
       type: object
@@ -717,7 +723,7 @@ components:
         moves:
           type: array
           minItems: 1
-          items: { $ref: "#/components/schemas/PatternMoveOp" }
+          items: { $ref: '#/components/schemas/PatternMoveOp' }
 
     PatternsResponse:
       type: object
@@ -728,7 +734,7 @@ components:
         total: { type: integer }
         items:
           type: array
-          items: { $ref: "#/components/schemas/Pattern" }
+          items: { $ref: '#/components/schemas/Pattern' }
 
     CraftPlanRequest:
       type: object
@@ -749,21 +755,21 @@ components:
     CraftRecipeTreeInput:
       type: object
       properties:
-        item: { $ref: "#/components/schemas/Item" }
+        item: { $ref: '#/components/schemas/Item' }
         missing: { type: boolean }
-        child: { $ref: "#/components/schemas/CraftRecipeTreeNode" }
+        child: { $ref: '#/components/schemas/CraftRecipeTreeNode' }
 
     CraftRecipeTreeNode:
       type: object
       properties:
-        output: { $ref: "#/components/schemas/Item" }
+        output: { $ref: '#/components/schemas/Item' }
         times: { type: string }
         mode: { type: string }
         patternId: { type: string }
         missing: { type: boolean }
         inputs:
           type: array
-          items: { $ref: "#/components/schemas/CraftRecipeTreeInput" }
+          items: { $ref: '#/components/schemas/CraftRecipeTreeInput' }
 
     CraftPlanResponse:
       type: object
@@ -779,16 +785,16 @@ components:
         multiplePaths: { type: boolean }
         usedItems:
           type: array
-          items: { $ref: "#/components/schemas/Item" }
-        tree: { $ref: "#/components/schemas/CraftRecipeTreeNode" }
+          items: { $ref: '#/components/schemas/Item' }
+        tree: { $ref: '#/components/schemas/CraftRecipeTreeNode' }
         cpus:
           type: array
-          items: { $ref: "#/components/schemas/CraftPlanCpu" }
+          items: { $ref: '#/components/schemas/CraftPlanCpu' }
         warning: { type: string }
         missing:
           type: array
-          items: { $ref: "#/components/schemas/Item" }
-        output: { $ref: "#/components/schemas/Item" }
+          items: { $ref: '#/components/schemas/Item' }
+        output: { $ref: '#/components/schemas/Item' }
 
     CraftSubmitRequest:
       type: object
@@ -802,9 +808,44 @@ components:
       type: object
       additionalProperties: true
 
+    CraftJobStatusEntry:
+      type: object
+      description: |
+        与游戏内合成 CPU GUI 同源：CPU 缓冲库存 / 等待回库（制造中）/ 待推送样板产出。
+      required: [item, stored, active, pending]
+      properties:
+        item: { $ref: '#/components/schemas/Item' }
+        stored: { type: string, description: CPU 库存中已有数量 }
+        active: { type: string, description: 已发出、等待回库数量 }
+        pending: { type: string, description: 尚未推送的样板产出数量 }
+
+    CraftJob:
+      type: object
+      required: [cpuName, busy, status]
+      properties:
+        cpuName: { type: string }
+        busy: { type: boolean }
+        status: { type: string }
+        detail: { type: string }
+        output: { $ref: '#/components/schemas/Item' }
+        progress: { type: string }
+        totalItems: { type: string }
+        progressPercent: { type: number }
+        crafted: { type: string }
+        requested: { type: string }
+        elapsedNanos: { type: string }
+        entries:
+          type: array
+          description: 忙碌时合成进度明细（物品行）
+          items: { $ref: '#/components/schemas/CraftJobStatusEntry' }
+
     CraftJobsResponse:
       type: object
-      additionalProperties: true
+      required: [jobs]
+      properties:
+        jobs:
+          type: array
+          items: { $ref: '#/components/schemas/CraftJob' }
 
     CraftCancelRequest:
       type: object

@@ -13,6 +13,7 @@ export type {
   CraftCancelRequest,
   CraftCancelResponse,
   CraftJob,
+  CraftJobStatusEntry,
   CraftJobsResponse,
   CraftPlanCpu,
   CraftPlanRequest,

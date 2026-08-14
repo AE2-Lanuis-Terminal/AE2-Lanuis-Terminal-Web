@@ -343,9 +343,12 @@ export interface components {
     }
     WebsocketInfo: {
       enabled: boolean
+      /** @description 对外 WS 端口；与 HTTP 相同时表示单端口分流 */
       port: number
       pushIntervalMs: number
       running?: boolean
+      /** @description true 时与 http.port 相同（默认） */
+      sameAsHttp?: boolean
     }
     HealthResponse: {
       ok: boolean
@@ -487,9 +490,19 @@ export interface components {
     Pattern: {
       id?: string
       name?: string
+      /** @description 工作模式：crafting / processing / smithing / stonecutting / other */
       mode?: string
       /** @description 在供应器 patternInv 中的下标 */
       slotIndex?: number
+      /** @description 编码人（样板物品 NBT 可选字段，无则省略） */
+      encoder?: string
+      /** @description 原版/数据包配方 ID（工作台样板常见） */
+      recipeId?: string
+      /**
+       * @description 有序/无序合成（仅 crafting 模式可能有）
+       * @enum {string}
+       */
+      craftingShape?: 'shaped' | 'shapeless'
       primaryOutput?: components['schemas']['Item']
       outputs?: components['schemas']['Item'][]
       inputs?: components['schemas']['PatternInput'][]
@@ -581,8 +594,33 @@ export interface components {
     CraftSubmitResponse: {
       [key: string]: unknown
     }
+    /** @description 与游戏内合成 CPU GUI 同源：CPU 缓冲库存 / 等待回库（制造中）/ 待推送样板产出。 */
+    CraftJobStatusEntry: {
+      item: components['schemas']['Item']
+      /** @description CPU 库存中已有数量 */
+      stored: string
+      /** @description 已发出、等待回库数量 */
+      active: string
+      /** @description 尚未推送的样板产出数量 */
+      pending: string
+    }
+    CraftJob: {
+      cpuName: string
+      busy: boolean
+      status: string
+      detail?: string
+      output?: components['schemas']['Item']
+      progress?: string
+      totalItems?: string
+      progressPercent?: number
+      crafted?: string
+      requested?: string
+      elapsedNanos?: string
+      /** @description 忙碌时合成进度明细（物品行） */
+      entries?: components['schemas']['CraftJobStatusEntry'][]
+    }
     CraftJobsResponse: {
-      [key: string]: unknown
+      jobs: components['schemas']['CraftJob'][]
     }
     CraftCancelRequest: {
       cpuName: string

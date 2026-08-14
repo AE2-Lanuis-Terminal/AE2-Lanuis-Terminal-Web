@@ -363,6 +363,10 @@ export const mockPatterns: Pattern[] = [
   withProvider('fp-fluix', PROVIDER_A, {
     name: 'Fluix Crystal',
     mode: 'crafting',
+    slotIndex: 0,
+    encoder: 'Lanuis',
+    recipeId: 'ae2:misc/fluixcrystal',
+    craftingShape: 'shapeless',
     primaryOutput: patternItem('ae2:fluix_crystal', 'Fluix Crystal', '2'),
     outputs: [patternItem('ae2:fluix_crystal', 'Fluix Crystal', '2')],
     inputs: [
@@ -381,6 +385,8 @@ export const mockPatterns: Pattern[] = [
   withProvider('fp-silicon', PROVIDER_A, {
     name: 'Advanced Circuit MV',
     mode: 'processing',
+    slotIndex: 1,
+    encoder: 'Steve',
     primaryOutput: patternItem('ae2:silicon', 'Silicon', '1'),
     outputs: [patternItem('ae2:silicon', 'Silicon', '1')],
     inputs: [{ item: patternItem('ae2:certus_quartz_dust', 'Certus Quartz Dust', '1'), multiplier: '1' }],
@@ -391,6 +397,8 @@ export const mockPatterns: Pattern[] = [
   withProvider('fp-logic', PROVIDER_B, {
     name: 'Logic Processor',
     mode: 'processing',
+    slotIndex: 2,
+    encoder: 'Alex',
     primaryOutput: patternItem('ae2:logic_processor', 'Logic Processor', '1'),
     outputs: [patternItem('ae2:logic_processor', 'Logic Processor', '1')],
     inputs: [
@@ -405,6 +413,8 @@ export const mockPatterns: Pattern[] = [
   withProvider('fp-stone', PROVIDER_B, {
     name: 'Stone Bricks',
     mode: 'stonecutting',
+    slotIndex: 0,
+    recipeId: 'minecraft:stone_bricks',
     primaryOutput: patternItem('minecraft:stone_bricks', 'Stone Bricks', '1'),
     outputs: [patternItem('minecraft:stone_bricks', 'Stone Bricks', '1')],
     inputs: [{ item: patternItem('minecraft:stone', 'Stone', '1'), multiplier: '1' }],
@@ -415,6 +425,10 @@ export const mockPatterns: Pattern[] = [
   withProvider('fp-smooth-sky', PROVIDER_B, {
     name: 'Smooth Sky Stone',
     mode: 'other',
+    slotIndex: 3,
+    craftingShape: 'shaped',
+    recipeId: 'ae2:decorative/smooth_sky_stone_block',
+    encoder: 'Lanuis',
     primaryOutput: patternItem('ae2:smooth_sky_stone_block', 'Smooth Sky Stone', '1'),
     outputs: [patternItem('ae2:smooth_sky_stone_block', 'Smooth Sky Stone', '1')],
     inputs: [{ item: patternItem('ae2:sky_stone_block', 'Sky Stone', '1'), multiplier: '1' }],
@@ -425,6 +439,8 @@ export const mockPatterns: Pattern[] = [
   withProvider('fp-netherite', PROVIDER_C, {
     name: 'Netherite Ingot',
     mode: 'smithing',
+    slotIndex: 0,
+    encoder: 'Alex',
     primaryOutput: patternItem('minecraft:netherite_ingot', 'Netherite Ingot', '1'),
     outputs: [patternItem('minecraft:netherite_ingot', 'Netherite Ingot', '1')],
     inputs: [
@@ -448,6 +464,7 @@ export const mockJobs: CraftJob[] = [
     progressPercent: 37.5,
     crafted: '24',
     requested: '64',
+    elapsedNanos: '125000000000',
     output: {
       key: 'item:ae2:fluix_crystal',
       id: 'ae2:fluix_crystal',
@@ -456,6 +473,47 @@ export const mockJobs: CraftJob[] = [
       craftable: true,
       iconUrl: '/api/v1/icons/item/ae2/fluix_crystal',
     },
+    entries: [
+      {
+        item: {
+          key: 'item:ae2:fluix_crystal',
+          id: 'ae2:fluix_crystal',
+          displayName: 'Fluix Crystal',
+          amount: '40',
+          craftable: true,
+          iconUrl: '/api/v1/icons/item/ae2/fluix_crystal',
+        },
+        stored: '8',
+        active: '16',
+        pending: '16',
+      },
+      {
+        item: {
+          key: 'item:ae2:certus_quartz_crystal',
+          id: 'ae2:certus_quartz_crystal',
+          displayName: 'Certus Quartz Crystal',
+          amount: '32',
+          craftable: true,
+          iconUrl: '/api/v1/icons/item/ae2/certus_quartz_crystal',
+        },
+        stored: '12',
+        active: '8',
+        pending: '12',
+      },
+      {
+        item: {
+          key: 'item:minecraft:redstone',
+          id: 'minecraft:redstone',
+          displayName: 'Redstone',
+          amount: '20',
+          craftable: false,
+          iconUrl: '/api/v1/icons/item/minecraft/redstone',
+        },
+        stored: '20',
+        active: '0',
+        pending: '0',
+      },
+    ],
   },
   {
     cpuName: 'Crafting CPU #2',
@@ -467,6 +525,7 @@ export const mockJobs: CraftJob[] = [
     progressPercent: 31.25,
     crafted: '80',
     requested: '256',
+    elapsedNanos: '480000000000',
     output: {
       key: 'item:gtceu:steel_ingot',
       id: 'gtceu:steel_ingot',
@@ -475,6 +534,34 @@ export const mockJobs: CraftJob[] = [
       craftable: true,
       iconUrl: '/api/v1/icons/item/gtceu/steel_ingot',
     },
+    entries: [
+      {
+        item: {
+          key: 'item:gtceu:steel_ingot',
+          id: 'gtceu:steel_ingot',
+          displayName: 'Steel Ingot',
+          amount: '176',
+          craftable: true,
+          iconUrl: '/api/v1/icons/item/gtceu/steel_ingot',
+        },
+        stored: '16',
+        active: '32',
+        pending: '128',
+      },
+      {
+        item: {
+          key: 'item:minecraft:iron_ingot',
+          id: 'minecraft:iron_ingot',
+          displayName: 'Iron Ingot',
+          amount: '64',
+          craftable: false,
+          iconUrl: '/api/v1/icons/item/minecraft/iron_ingot',
+        },
+        stored: '48',
+        active: '16',
+        pending: '0',
+      },
+    ],
   },
   {
     cpuName: 'Crafting CPU #3',
@@ -496,6 +583,7 @@ export const mockJobs: CraftJob[] = [
     progressPercent: 50,
     crafted: '512',
     requested: '1024',
+    elapsedNanos: '90000000000',
     output: {
       key: 'item:minecraft:redstone',
       id: 'minecraft:redstone',
@@ -504,5 +592,20 @@ export const mockJobs: CraftJob[] = [
       craftable: true,
       iconUrl: '/api/v1/icons/item/minecraft/redstone',
     },
+    entries: [
+      {
+        item: {
+          key: 'item:minecraft:redstone',
+          id: 'minecraft:redstone',
+          displayName: 'Redstone',
+          amount: '512',
+          craftable: true,
+          iconUrl: '/api/v1/icons/item/minecraft/redstone',
+        },
+        stored: '64',
+        active: '128',
+        pending: '320',
+      },
+    ],
   },
 ]

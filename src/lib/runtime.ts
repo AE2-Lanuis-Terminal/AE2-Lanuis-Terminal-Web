@@ -52,15 +52,29 @@ export type ConnectionConfig = {
 
 export function loadConnectionConfig(): ConnectionConfig {
   return {
-    serverHost: localStorage.getItem(KEYS.host) || '127.0.0.1',
+    serverHost: normalizeHost(localStorage.getItem(KEYS.host) || '127.0.0.1'),
     serverPort: Number(localStorage.getItem(KEYS.port) || '8765') || 8765,
     protocol: (localStorage.getItem(KEYS.protocol) as 'http' | 'https') || 'http',
     account: localStorage.getItem(KEYS.account) || '',
   }
 }
 
+/** 去掉协议、路径；若误写 host:port 则拆出端口（留给单独端口字段）。 */
+export function normalizeHost(raw: string): string {
+  let s = raw.trim()
+  s = s.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '')
+  s = s.split('/')[0] || ''
+  // IPv6 bracket form [addr]:port
+  const br = s.match(/^\[([^\]]+)\](?::(\d+))?$/)
+  if (br) return br[1]
+  // host:port（非 IPv6）
+  const m = s.match(/^([^:]+):(\d+)$/)
+  if (m) return m[1]
+  return s
+}
+
 export function saveConnectionConfig(cfg: Partial<ConnectionConfig>) {
-  if (cfg.serverHost != null) localStorage.setItem(KEYS.host, cfg.serverHost)
+  if (cfg.serverHost != null) localStorage.setItem(KEYS.host, normalizeHost(cfg.serverHost))
   if (cfg.serverPort != null) localStorage.setItem(KEYS.port, String(cfg.serverPort))
   if (cfg.protocol != null) localStorage.setItem(KEYS.protocol, cfg.protocol)
   if (cfg.account != null) localStorage.setItem(KEYS.account, cfg.account)

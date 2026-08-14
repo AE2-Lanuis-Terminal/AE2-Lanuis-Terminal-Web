@@ -41,6 +41,9 @@ export type Pattern = {
   name?: string
   mode?: string
   slotIndex?: number
+  encoder?: string
+  recipeId?: string
+  craftingShape?: 'shaped' | 'shapeless' | string
   primaryOutput?: Item
   outputs: Item[]
   inputs: PatternInput[]
@@ -62,6 +65,12 @@ export type CraftJob = {
   crafted?: string
   requested?: string
   elapsedNanos?: string
+  entries?: {
+    item: Item
+    stored: string
+    active: string
+    pending: string
+  }[]
 }
 
 export type CraftRecipeTreeInput = {

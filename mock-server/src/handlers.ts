@@ -36,9 +36,17 @@ type PlanCache = {
 }
 
 const PLAN_TTL_MS = 60_000
+/** 忙碌任务模拟时长（与轮询次数无关，避免 amount=1 一刷即完成） */
+const MOCK_JOB_DURATION_MS = 14_000
 const sessions = new Map<string, SessionRecord>()
 const plans = new Map<string, PlanCache>()
-let jobsState: CraftJob[] = mockJobs.map((j) => ({ ...j, output: j.output ? { ...j.output } : undefined }))
+let jobsState: CraftJob[] = mockJobs.map((j) => ({
+  ...j,
+  output: j.output ? { ...j.output } : undefined,
+  entries: j.entries?.map((e) => ({ ...e, item: { ...e.item } })),
+}))
+/** cpuName → 模拟起止，不写入 API 响应 */
+const jobMockTiming = new Map<string, { startedAt: number; durationMs: number }>()
 const auditLog: AuditEntry[] = []
 
 const MOCK_BINDINGS: AdminBinding[] = [
@@ -122,25 +130,85 @@ function clearJobProgress(job: CraftJob) {
   delete job.crafted
   delete job.requested
   delete job.elapsedNanos
+  delete job.entries
+  jobMockTiming.delete(job.cpuName)
+}
+
+function mockJobDurationMs(amount: string): number {
+  const n = Math.max(1, Number(amount) || 1)
+  // 约 10–20s，数量越大略久，便于观察进度条/置顶行
+  return Math.min(20_000, Math.max(10_000, Math.round(9_000 + Math.log10(n + 9) * 5_000)))
+}
+
+function ensureJobTiming(job: CraftJob, now: number): { startedAt: number; durationMs: number } {
+  let timing = jobMockTiming.get(job.cpuName)
+  if (timing) return timing
+  const pct = Math.min(100, Math.max(0, Number(job.progressPercent) || 0))
+  const durationMs = MOCK_JOB_DURATION_MS
+  timing = {
+    startedAt: now - Math.round((durationMs * pct) / 100),
+    durationMs,
+  }
+  jobMockTiming.set(job.cpuName, timing)
+  return timing
 }
 
 function tickMockJobsProgress() {
+  const now = Date.now()
   for (const job of jobsState) {
     if (!job.busy) continue
+    const timing = ensureJobTiming(job, now)
+    const ratio = Math.min(1, (now - timing.startedAt) / timing.durationMs)
     const total = BigInt(job.totalItems || job.requested || '64')
-    let progress = BigInt(job.progress || job.crafted || '0')
-    const step = total / 12n + 1n
-    progress += step
-    if (progress >= total) {
+    if (ratio >= 1) {
       clearJobProgress(job)
       continue
     }
+    let progress = (total * BigInt(Math.floor(ratio * 1000))) / 1000n
+    if (progress >= total && total > 0n) progress = total - 1n
     job.progress = progress.toString()
     job.totalItems = total.toString()
-    job.progressPercent = Number((progress * 1000n) / total) / 10
+    job.progressPercent = Math.round(ratio * 1000) / 10
     job.crafted = progress.toString()
     job.requested = total.toString()
+    job.elapsedNanos = String(BigInt(Math.max(0, now - timing.startedAt)) * 1_000_000n)
+    if (job.entries?.length) {
+      const head = job.entries[0]
+      if (head) {
+        const pending = total > progress ? (total - progress).toString() : '0'
+        head.active = progress > 0n ? '1' : '0'
+        head.pending = pending
+        head.stored = progress.toString()
+      }
+    }
   }
+}
+
+function activateMockJob(job: CraftJob, item: Item, amount: string) {
+  const totalNum = Math.max(1, Number(amount) || 1)
+  const active = Math.min(totalNum, 16)
+  job.busy = true
+  job.status = 'crafting'
+  job.detail = `${item.id} x${amount}`
+  job.output = { ...item, amount: String(amount) }
+  job.progress = '0'
+  job.totalItems = String(amount)
+  job.progressPercent = 0
+  job.crafted = '0'
+  job.requested = String(amount)
+  job.elapsedNanos = '0'
+  job.entries = [
+    {
+      item: { ...item, amount: String(amount) },
+      stored: '0',
+      active: String(active),
+      pending: String(Math.max(0, totalNum - active)),
+    },
+  ]
+  jobMockTiming.set(job.cpuName, {
+    startedAt: Date.now(),
+    durationMs: mockJobDurationMs(amount),
+  })
 }
 
 function parsePath(url: string): { pathname: string; search: URLSearchParams } {
@@ -679,20 +747,10 @@ export async function dispatchMock(input: MockRequestInput): Promise<unknown> {
     if (!item) throw new MockHttpError(400, 'invalid_item', 'Unknown item key (mock)')
 
     const idle = body.cpuName ? jobsState.find((j) => j.cpuName === body.cpuName && !j.busy) : jobsState.find((j) => !j.busy)
-    if (body.cpuName && !idle) {
+    if (!idle) {
       throw new MockHttpError(400, 'cpu_busy', 'Crafting CPU busy or missing (mock)')
     }
-    if (idle) {
-      idle.busy = true
-      idle.status = 'crafting'
-      idle.detail = `${item.id} x${amount}`
-      idle.output = { ...item, amount: String(amount) }
-      idle.progress = '0'
-      idle.totalItems = String(amount)
-      idle.progressPercent = 0
-      idle.crafted = '0'
-      idle.requested = String(amount)
-    }
+    activateMockJob(idle, item, amount)
     pushAudit({
       action: 'craft_submit',
       actorUuid: session.playerUuid,
@@ -709,7 +767,13 @@ export async function dispatchMock(input: MockRequestInput): Promise<unknown> {
   if (method === 'GET' && pathname === '/api/v1/crafting/jobs') {
     requireSession(input.headers)
     tickMockJobsProgress()
-    return { jobs: jobsState.map((j) => ({ ...j, output: j.output ? { ...j.output } : undefined })) }
+    return {
+      jobs: jobsState.map((j) => ({
+        ...j,
+        output: j.output ? { ...j.output } : undefined,
+        entries: j.entries?.map((e) => ({ ...e, item: { ...e.item } })),
+      })),
+    }
   }
 
   if (method === 'POST' && pathname === '/api/v1/crafting/cancel') {

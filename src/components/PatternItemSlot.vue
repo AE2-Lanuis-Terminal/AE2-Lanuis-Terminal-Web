@@ -1,5 +1,6 @@
 <!--
-  样板材料槽：内凹立体格 + 数量角标；悬浮显示名称（与 id）。
+  样板材料槽：内凹立体格 + 数量角标；可选悬浮显示名称（与 id）。
+  触发器默认 tabindex=-1，避免对话框打开时焦点落入导致 tooltip 自动弹出。
 -->
 <script setup lang="ts">
 import type { Item } from '@/types'
@@ -17,8 +18,10 @@ const props = withDefaults(
     amount?: string
     /** input=常规凹槽；output=产物高光；alt=替代弱化 */
     variant?: 'input' | 'output' | 'alt'
+    /** 是否启用悬浮提示；详情 header 等已有名称时可关 */
+    tip?: boolean
   }>(),
-  { size: 32, variant: 'input' },
+  { size: 32, variant: 'input', tip: true },
 )
 
 const tipName = () => stripMcFormat(props.item.displayName) || props.item.id
@@ -26,18 +29,23 @@ const amountText = () => {
   if (props.amount !== undefined) return props.amount
   return props.item.amount || ''
 }
+
+function slotClass() {
+  return cn('ui-me-slot overflow-hidden p-0', variantClass(), !props.tip && 'ui-me-slot--static')
+}
+
+function variantClass() {
+  if (props.variant === 'output') return 'ui-me-slot--output'
+  if (props.variant === 'alt') return 'ui-me-slot--alt'
+  return undefined
+}
 </script>
 
 <template>
-  <Tooltip>
+  <Tooltip v-if="tip">
     <TooltipTrigger as-child>
-      <button
-        type="button"
-        :class="cn('ui-me-slot', variant === 'output' && 'ui-me-slot--output', variant === 'alt' && 'ui-me-slot--alt')"
-        :style="{ width: `${size + 10}px`, height: `${size + 10}px` }"
-        :aria-label="tipName()"
-      >
-        <ItemIcon :item="item" :size="size" flush class="relative z-[1] drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]" />
+      <button type="button" tabindex="-1" :class="slotClass()" :style="{ width: `${size}px`, height: `${size}px` }" :aria-label="tipName()">
+        <ItemIcon :item="item" flush class="relative z-[1] drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]" />
         <span v-if="amountText()" class="ui-me-slot-amount mono">×{{ amountText() }}</span>
       </button>
     </TooltipTrigger>
@@ -52,4 +60,8 @@ const amountText = () => {
       <span class="mono block max-w-full truncate text-[10px] text-muted">{{ item.id }}</span>
     </TooltipContent>
   </Tooltip>
+  <div v-else :class="slotClass()" :style="{ width: `${size}px`, height: `${size}px` }" role="img" :aria-label="tipName()">
+    <ItemIcon :item="item" flush class="relative z-[1] drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]" />
+    <span v-if="amountText()" class="ui-me-slot-amount mono">×{{ amountText() }}</span>
+  </div>
 </template>

@@ -1,5 +1,6 @@
 <!--
-  ME 样板供应器槽位板：容量、选择高亮、拖拽/批量移动。
+  ME 样板供应器槽位板：固定槽位拖拽（同组/跨组交换或移入空槽），不改本地槽位数。
+  桌面细指针：HTML5 DnD；触控/粗指针：长按 + 指针拖。
 -->
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
@@ -11,16 +12,18 @@ import PatternItemSlot from './PatternItemSlot.vue'
 import PatternMoveTargetDialog from './PatternMoveTargetDialog.vue'
 import PatternRecipePreview from './PatternRecipePreview.vue'
 import ScrollFade from './ScrollFade.vue'
+import { usePatternPointerDrag, type PatternDropHit } from '../composables/usePatternPointerDrag'
 import { useSwapKey } from '../composables/useSwapKey'
+import { preferTouchTargets } from '@/lib/platform'
 import { ChevronDownIcon } from '@lucide/vue'
 import { affixActionClass, AppButton, AppDialog, AppFadeSwap, AppInput, AppSelect, type AppSelectOption } from '@/ui'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { stripMcFormat } from '@/lib/mcFormat'
 
 type SlotKey = string // providerId:slotIndex
 
 const { t } = useI18n()
+const touchUi = preferTouchTargets()
 const qOutput = ref('')
 const qInput = ref('')
 const mode = ref('all')
@@ -34,11 +37,16 @@ const selectMode = ref(false)
 const selectedKeys = ref<Set<SlotKey>>(new Set())
 const moveOpen = ref(false)
 const moving = ref(false)
+/** 正在拖的槽（仅高亮，不改 slots 数组） */
 const dragKeys = ref<SlotKey[]>([])
 const dropTarget = ref<string>('') // providerId or providerId:slotIndex
-/** 收起的供应器 id */
 const collapsedIds = ref<Set<string>>(new Set())
 const listSwapKey = useSwapKey([qOutput, qInput, mode], providers)
+const scrollFade = ref<{ getScrollEl?: () => HTMLElement | null | undefined } | null>(null)
+
+function getScrollEl() {
+  return scrollFade.value?.getScrollEl?.() ?? null
+}
 
 const modeOptions = computed<AppSelectOption[]>(() => [
   { value: 'all', label: t('patterns.modeAll') },
@@ -50,6 +58,18 @@ const modeOptions = computed<AppSelectOption[]>(() => [
 ])
 
 const selectedCount = computed(() => selectedKeys.value.size)
+const dragging = computed(() => dragKeys.value.length > 0)
+
+const slotSizeClass = touchUi ? 'size-12' : 'size-11'
+const gridMaxClass = touchUi ? 'max-w-[calc(3rem*9+0.375rem*8)]' : 'max-w-[calc(2.75rem*9+0.375rem*8)]'
+
+const ghostPattern = computed(() => {
+  const key = dragKeys.value[0]
+  if (!key) return null
+  const { providerId, slotIndex } = parseSlotKey(key)
+  const board = providers.value.find((b) => b.id === providerId)
+  return board?.slots.find((s) => s.index === slotIndex)?.pattern ?? null
+})
 
 function slotKey(providerId: string, slotIndex: number): SlotKey {
   return `${providerId}:${slotIndex}`
@@ -75,6 +95,23 @@ function providerPosText(provider?: PatternProvider) {
   if (!provider?.pos) return ''
   const { x, y, z, dimension } = provider.pos
   return t('patterns.providerPos', { x, y, z, dimension })
+}
+
+function craftingShapeLabel(shape?: string) {
+  if (shape === 'shaped') return t('patterns.craftingShapeShaped')
+  if (shape === 'shapeless') return t('patterns.craftingShapeShapeless')
+  return shape || ''
+}
+
+function providerTargetsText(provider?: PatternProvider) {
+  const list = provider?.targets
+  if (!list?.length) return ''
+  return list
+    .map((tg) => {
+      const side = tg.side ? ` (${tg.side})` : ''
+      return `${tg.name || tg.blockId || '?'}${side}`
+    })
+    .join(' · ')
 }
 
 function patternTitle(p: Pattern) {
@@ -114,6 +151,10 @@ function isSelected(providerId: string, slotIndex: number) {
   return selectedKeys.value.has(slotKey(providerId, slotIndex))
 }
 
+function isDraggingSlot(providerId: string, slotIndex: number) {
+  return dragKeys.value.includes(slotKey(providerId, slotIndex))
+}
+
 function toggleSelect(providerId: string, slotIndex: number) {
   const key = slotKey(providerId, slotIndex)
   const next = new Set(selectedKeys.value)
@@ -151,12 +192,21 @@ function onDetailOpen(open: boolean) {
 }
 
 function patternChipClass(providerId: string, slotIndex: number, hasPattern: boolean) {
+  const key = slotKey(providerId, slotIndex)
   return cn(
-    'ui-me-slot relative inline-flex size-11 items-center justify-center rounded-[7px] p-0',
+    'ui-me-slot pattern-chip relative inline-flex items-center justify-center overflow-hidden rounded-[7px] p-0',
+    slotSizeClass,
+    hasPattern && boardMovable(providerId) ? (touchUi ? 'touch-manipulation' : 'cursor-grab active:cursor-grabbing') : undefined,
     !hasPattern && 'border-dashed opacity-65',
     isSelected(providerId, slotIndex) && 'ring-2 ring-cyan/50 border-[color:var(--glass-border-bright)]',
-    dropTarget.value === slotKey(providerId, slotIndex) && 'ring-2 ring-cyan/60',
+    isDraggingSlot(providerId, slotIndex) && 'opacity-40',
+    dropTarget.value === key && 'pattern-slot--drop-target ring-2 ring-cyan/70',
+    pressKey.value === key && 'pattern-slot--pressing',
   )
+}
+
+function boardMovable(providerId: string) {
+  return providers.value.find((b) => b.id === providerId)?.movable !== false
 }
 
 async function load() {
@@ -187,17 +237,18 @@ async function applyMoves(moves: PatternMoveOp[]) {
     await load()
   } catch (e) {
     moveError.value = e instanceof Error ? e.message : String(e)
+    await load()
   } finally {
     moving.value = false
   }
 }
 
-function buildMovesToProvider(toProviderId: string, toSlotIndex?: number): PatternMoveOp[] {
-  const keys = [...selectedKeys.value]
+function buildMovesToProvider(toProviderId: string, toSlotIndex?: number, keys = [...selectedKeys.value]): PatternMoveOp[] {
   if (!keys.length) return []
   const moves: PatternMoveOp[] = []
   if (toSlotIndex != null && keys.length === 1) {
     const from = parseSlotKey(keys[0]!)
+    if (from.providerId === toProviderId && from.slotIndex === toSlotIndex) return []
     moves.push({ from, to: { providerId: toProviderId, slotIndex: toSlotIndex } })
     return moves
   }
@@ -213,12 +264,9 @@ async function onMoveConfirm(providerId: string) {
   await applyMoves(buildMovesToProvider(providerId))
 }
 
-function onDragStart(ev: DragEvent, providerId: string, slotIndex: number, hasPattern: boolean) {
-  if (!hasPattern) {
-    ev.preventDefault()
-    return
-  }
-  const key = slotKey(providerId, slotIndex)
+function beginDragKeys(board: PatternProviderBoard, slotIndex: number): SlotKey[] | null {
+  if (board.movable === false || moving.value) return null
+  const key = slotKey(board.id, slotIndex)
   let keys = [key]
   if (selectMode.value && selectedKeys.value.has(key) && selectedKeys.value.size > 1) {
     keys = [...selectedKeys.value]
@@ -226,8 +274,76 @@ function onDragStart(ev: DragEvent, providerId: string, slotIndex: number, hasPa
     selectedKeys.value = new Set([key])
   }
   dragKeys.value = keys
+  dropTarget.value = ''
+  return keys
+}
+
+/** 专用拖影：浏览器对 live 节点常不裁圆角，且会带上拖中 opacity */
+function buildPatternDragImage(sourceEl: HTMLElement, count: number): HTMLElement {
+  const size = Math.max(sourceEl.offsetWidth || 44, sourceEl.offsetHeight || 44)
+  const root = document.createElement('div')
+  root.className = 'pattern-drag-ghost-root'
+  root.style.width = `${size}px`
+  root.style.height = `${size}px`
+
+  const wrap = document.createElement('div')
+  wrap.className = 'pattern-drag-ghost'
+  wrap.style.width = `${size}px`
+  wrap.style.height = `${size}px`
+
+  const img = sourceEl.querySelector('img')
+  if (img instanceof HTMLImageElement) {
+    const clone = img.cloneNode(true) as HTMLImageElement
+    clone.removeAttribute('loading')
+    clone.draggable = false
+    clone.className = 'pattern-drag-ghost__img'
+    wrap.appendChild(clone)
+  } else {
+    const ph = sourceEl.querySelector('.ui-item-icon-placeholder')
+    if (ph) {
+      const clone = ph.cloneNode(true) as HTMLElement
+      clone.classList.add('pattern-drag-ghost__img')
+      wrap.appendChild(clone)
+    }
+  }
+  root.appendChild(wrap)
+
+  if (count > 1) {
+    const badge = document.createElement('span')
+    badge.className = 'pattern-drag-ghost__badge'
+    badge.textContent = String(count)
+    root.appendChild(badge)
+  }
+  return root
+}
+
+function onDragStart(ev: DragEvent, board: PatternProviderBoard, slotIndex: number, hasPattern: boolean) {
+  if (touchUi || !hasPattern) {
+    ev.preventDefault()
+    return
+  }
+  const keys = beginDragKeys(board, slotIndex)
+  if (!keys) {
+    ev.preventDefault()
+    return
+  }
   ev.dataTransfer?.setData('text/plain', keys.join(','))
-  if (ev.dataTransfer) ev.dataTransfer.effectAllowed = 'move'
+  if (ev.dataTransfer) {
+    ev.dataTransfer.effectAllowed = 'move'
+    const el = ev.currentTarget as HTMLElement | null
+    if (el) {
+      try {
+        const ghostEl = buildPatternDragImage(el, keys.length)
+        document.body.appendChild(ghostEl)
+        const half = Math.round((el.clientWidth || 44) / 2)
+        ev.dataTransfer.setDragImage(ghostEl, half, half)
+        // 需保留一帧供浏览器截图，再移除
+        requestAnimationFrame(() => ghostEl.remove())
+      } catch {
+        // ignore
+      }
+    }
+  }
 }
 
 function onDragEnd() {
@@ -235,43 +351,158 @@ function onDragEnd() {
   dropTarget.value = ''
 }
 
-function onDragOverProvider(ev: DragEvent, board: PatternProviderBoard) {
-  if (board.movable === false || !dragKeys.value.length) return
+function canAcceptDrop(board: PatternProviderBoard) {
+  return board.movable !== false && dragKeys.value.length > 0 && !moving.value
+}
+
+function applyDropHit(hit: PatternDropHit | null) {
+  if (!hit) {
+    dropTarget.value = ''
+    return
+  }
+  const board = providers.value.find((b) => b.id === hit.providerId)
+  if (!board || board.movable === false) {
+    dropTarget.value = ''
+    return
+  }
+  if (hit.slotIndex != null) {
+    const key = slotKey(hit.providerId, hit.slotIndex)
+    if (dragKeys.value.length === 1 && dragKeys.value[0] === key) {
+      dropTarget.value = hit.providerId
+      return
+    }
+    dropTarget.value = key
+    return
+  }
+  dropTarget.value = hit.providerId
+}
+
+function onDragOverBoard(ev: DragEvent, board: PatternProviderBoard) {
+  if (!canAcceptDrop(board)) return
   ev.preventDefault()
-  dropTarget.value = board.id
+  if (ev.dataTransfer) ev.dataTransfer.dropEffect = 'move'
+  if (!dropTarget.value.includes(':')) {
+    dropTarget.value = board.id
+  }
+  autoScrollFromClientY(ev.clientY)
 }
 
 function onDragOverSlot(ev: DragEvent, board: PatternProviderBoard, slotIndex: number) {
-  if (board.movable === false || !dragKeys.value.length) return
+  if (!canAcceptDrop(board)) return
   ev.preventDefault()
-  dropTarget.value = slotKey(board.id, slotIndex)
+  ev.stopPropagation()
+  if (ev.dataTransfer) ev.dataTransfer.dropEffect = 'move'
+  const key = slotKey(board.id, slotIndex)
+  if (dragKeys.value.length === 1 && dragKeys.value[0] === key) {
+    dropTarget.value = board.id
+  } else {
+    dropTarget.value = key
+  }
+  autoScrollFromClientY(ev.clientY)
 }
 
-async function onDropProvider(ev: DragEvent, board: PatternProviderBoard) {
-  ev.preventDefault()
-  if (board.movable === false) return
-  const keys = dragKeys.value.length ? dragKeys.value : (ev.dataTransfer?.getData('text/plain') || '').split(',').filter(Boolean)
-  selectedKeys.value = new Set(keys)
-  dropTarget.value = ''
+function onDragLeaveBoard(ev: DragEvent, board: PatternProviderBoard) {
+  const related = ev.relatedTarget as Node | null
+  const cur = ev.currentTarget as HTMLElement
+  if (related && cur.contains(related)) return
+  if (dropTarget.value === board.id || dropTarget.value.startsWith(`${board.id}:`)) {
+    dropTarget.value = ''
+  }
+}
+
+function autoScrollFromClientY(clientY: number) {
+  const el = getScrollEl()
+  if (!el || !dragging.value) return
+  const rect = el.getBoundingClientRect()
+  const edge = 52
+  if (clientY < rect.top + edge) {
+    const t = (edge - (clientY - rect.top)) / edge
+    el.scrollTop -= Math.max(2, Math.ceil(14 * t))
+  } else if (clientY > rect.bottom - edge) {
+    const t = (edge - (rect.bottom - clientY)) / edge
+    el.scrollTop += Math.max(2, Math.ceil(14 * t))
+  }
+}
+
+async function commitDrop(board: PatternProviderBoard, toSlotIndex?: number) {
+  if (!canAcceptDrop(board)) return
+  const keys = dragKeys.value.length ? [...dragKeys.value] : []
   dragKeys.value = []
-  await applyMoves(buildMovesToProvider(board.id))
+  dropTarget.value = ''
+  if (!keys.length) return
+
+  selectedKeys.value = new Set(keys)
+  if (keys.length === 1 && toSlotIndex != null) {
+    await applyMoves(buildMovesToProvider(board.id, toSlotIndex, keys))
+    return
+  }
+  await applyMoves(buildMovesToProvider(board.id, undefined, keys))
+}
+
+async function onDropBoard(ev: DragEvent, board: PatternProviderBoard) {
+  ev.preventDefault()
+  if (!canAcceptDrop(board)) return
+  const target = dropTarget.value
+  if (target.startsWith(`${board.id}:`)) {
+    const { slotIndex } = parseSlotKey(target)
+    await commitDrop(board, slotIndex)
+    return
+  }
+  await commitDrop(board)
 }
 
 async function onDropSlot(ev: DragEvent, board: PatternProviderBoard, slotIndex: number) {
   ev.preventDefault()
-  if (board.movable === false) return
-  const keys = dragKeys.value.length ? dragKeys.value : (ev.dataTransfer?.getData('text/plain') || '').split(',').filter(Boolean)
-  selectedKeys.value = new Set(keys)
-  dropTarget.value = ''
-  dragKeys.value = []
-  if (keys.length === 1) {
-    await applyMoves(buildMovesToProvider(board.id, slotIndex))
-  } else {
-    await applyMoves(buildMovesToProvider(board.id))
-  }
+  ev.stopPropagation()
+  if (!canAcceptDrop(board)) return
+  await commitDrop(board, slotIndex)
 }
 
+const { ghost, pressKey, shouldSuppressClick, onPointerDown } = usePatternPointerDrag({
+  enabled: () => touchUi && !moving.value,
+  onBegin: (providerId, slotIndex) => {
+    const board = providers.value.find((b) => b.id === providerId)
+    if (!board) return false
+    const slot = board.slots.find((s) => s.index === slotIndex)
+    if (!slot?.pattern) return false
+    return !!beginDragKeys(board, slotIndex)
+  },
+  onHover: applyDropHit,
+  onDrop: (hit) => {
+    void (async () => {
+      if (!hit) {
+        onDragEnd()
+        return
+      }
+      const board = providers.value.find((b) => b.id === hit.providerId)
+      if (!board || !canAcceptDrop(board)) {
+        onDragEnd()
+        return
+      }
+      await commitDrop(board, hit.slotIndex)
+    })()
+  },
+  onCancel: onDragEnd,
+})
+
+function onSlotPointerDown(ev: PointerEvent, board: PatternProviderBoard, slotIndex: number, hasPattern: boolean) {
+  if (!touchUi || !hasPattern || board.movable === false || moving.value) return
+  onPointerDown(ev, board.id, slotIndex, getScrollEl())
+}
+
+function onSlotContextMenu(ev: Event) {
+  if (touchUi) ev.preventDefault()
+}
+
+watch(dragging, (on) => {
+  const el = getScrollEl()
+  if (!el) return
+  el.classList.toggle('touch-none', on)
+  el.classList.toggle('overscroll-none', on)
+})
+
 function onSlotClick(board: PatternProviderBoard, slotIndex: number, pattern: Pattern | null | undefined) {
+  if (shouldSuppressClick() || dragging.value) return
   if (!pattern) return
   if (selectMode.value) {
     toggleSelect(board.id, slotIndex)
@@ -297,7 +528,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="flex h-full min-h-[240px] min-w-[280px] flex-col overflow-hidden">
+  <section class="flex h-full min-h-[240px] min-w-[280px] flex-col overflow-hidden" :class="dragging && 'pattern-board--dragging'">
     <div class="mb-3 flex shrink-0 flex-wrap items-center gap-2">
       <AppInput v-model="qOutput" compact mono class="min-w-[9rem] flex-1 basis-[9rem]" :placeholder="t('patterns.searchOutput')" />
       <AppInput v-model="qInput" compact mono class="min-w-[9rem] flex-1 basis-[9rem]" :placeholder="t('patterns.searchInput')">
@@ -323,21 +554,32 @@ onUnmounted(() => {
       </AppButton>
     </div>
 
+    <p v-else-if="touchUi && providers.length" class="mb-2 shrink-0 text-[11px] text-muted">
+      {{ t('patterns.dragHintTouch') }}
+    </p>
+
     <p v-if="error || moveError" class="mb-2 shrink-0 text-[13px] text-red">{{ error || moveError }}</p>
 
     <div class="relative min-h-0 flex-1" :aria-busy="loading || undefined">
       <div v-if="loading" class="ui-loading-bar" role="status" :aria-label="t('common.loading')" />
-      <ScrollFade class="h-full min-h-0 overflow-auto" :class="loading && providers.length ? 'opacity-55' : undefined">
+      <ScrollFade ref="scrollFade" :class="cn('h-full min-h-0', loading && providers.length && 'opacity-55')">
         <AppFadeSwap :swap-key="listSwapKey" appear>
           <p v-if="!providers.length && !loading" class="text-muted">{{ t('patterns.empty') }}</p>
-          <div v-else class="grid gap-3">
+          <div v-else class="grid gap-3 p-0.5">
             <section
               v-for="board in providers"
               :key="board.id"
-              class="grid gap-1.5 rounded-[10px] border border-transparent transition-[border-color,box-shadow]"
-              :class="dropTarget === board.id ? 'border-[color:var(--glass-border-bright)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--color-cyan)_35%,transparent)]' : undefined"
-              @dragover="onDragOverProvider($event, board)"
-              @drop="onDropProvider($event, board)"
+              class="grid gap-1.5 rounded-[10px] border border-transparent p-1 transition-[border-color,box-shadow,background-color]"
+              :data-pattern-drop-board="board.movable !== false ? '' : undefined"
+              :data-pattern-provider-id="board.id"
+              :class="
+                dropTarget === board.id || dropTarget.startsWith(`${board.id}:`)
+                  ? 'border-[color:var(--glass-border-bright)] bg-[color-mix(in_srgb,var(--color-cyan-dim)_10%,transparent)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-cyan)_40%,transparent)]'
+                  : undefined
+              "
+              @dragover="onDragOverBoard($event, board)"
+              @dragleave="onDragLeaveBoard($event, board)"
+              @drop="onDropBoard($event, board)"
             >
               <header class="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <button
@@ -373,47 +615,52 @@ onUnmounted(() => {
               </header>
 
               <div class="grid transition-[grid-template-rows] duration-200 ease-out" :class="isCollapsed(board.id) ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'">
-                <div class="min-h-0 overflow-hidden">
-                  <div class="grid grid-cols-[repeat(auto-fill,minmax(2.75rem,1fr))] gap-1.5">
-                    <Tooltip v-for="slot in board.slots" :key="`${board.id}-${slot.index}`" :disabled="!slot.pattern">
-                      <TooltipTrigger as-child>
-                        <button
-                          type="button"
-                          draggable="true"
-                          :class="patternChipClass(board.id, slot.index, !!slot.pattern)"
-                          :aria-label="slot.pattern ? primaryName(slot.pattern) : t('patterns.emptySlot')"
-                          @click="onSlotClick(board, slot.index, slot.pattern)"
-                          @dragstart="onDragStart($event, board.id, slot.index, !!slot.pattern)"
-                          @dragend="onDragEnd"
-                          @dragover="onDragOverSlot($event, board, slot.index)"
-                          @drop="onDropSlot($event, board, slot.index)"
-                        >
-                          <template v-if="slot.pattern">
-                            <ItemIcon :item="slot.pattern.primaryOutput" :size="28" flush class="relative z-[1] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]" />
-                            <span
-                              v-if="selectMode"
-                              class="absolute -top-1 -right-1 z-[2] flex size-3.5 items-center justify-center rounded-[3px] border border-line text-[8px] leading-none"
-                              :class="isSelected(board.id, slot.index) ? 'bg-cyan text-[#041018]' : 'bg-[color-mix(in_srgb,var(--color-panel)_80%,transparent)] text-muted'"
-                            >
-                              {{ isSelected(board.id, slot.index) ? '✓' : '' }}
-                            </span>
-                          </template>
-                          <span v-else class="sr-only">
-                            {{ dropTarget === slotKey(board.id, slot.index) ? t('patterns.dropHere') : t('patterns.emptySlot') }}
-                          </span>
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        v-if="slot.pattern"
-                        side="top"
-                        :side-offset="6"
-                        class="!max-w-[14rem] !border !border-line !bg-[var(--glass-bg-strong)] !px-2.5 !py-1.5 !text-ink shadow-[var(--glass-shadow)] [&_svg]:!bg-[var(--glass-bg-strong)] [&_svg]:!fill-[var(--glass-bg-strong)]"
+                <div class="min-h-0" :class="isCollapsed(board.id) ? 'overflow-hidden' : 'overflow-visible'">
+                  <div class="grid grid-cols-9 gap-1.5 py-0.5" :class="gridMaxClass">
+                    <div
+                      v-for="slot in board.slots"
+                      :key="`${board.id}:${slot.index}`"
+                      class="relative"
+                      :class="slotSizeClass"
+                      data-pattern-drop-slot
+                      :data-pattern-provider-id="board.id"
+                      :data-pattern-slot-index="slot.index"
+                      @dragover="onDragOverSlot($event, board, slot.index)"
+                      @drop="onDropSlot($event, board, slot.index)"
+                    >
+                      <div
+                        role="button"
+                        tabindex="0"
+                        :draggable="!touchUi && !!slot.pattern && board.movable !== false && !moving"
+                        :class="patternChipClass(board.id, slot.index, !!slot.pattern)"
+                        :aria-label="slot.pattern ? primaryName(slot.pattern) : t('patterns.emptySlot')"
+                        :title="slot.pattern ? primaryName(slot.pattern) : undefined"
+                        @click="onSlotClick(board, slot.index, slot.pattern)"
+                        @keydown.enter.prevent="onSlotClick(board, slot.index, slot.pattern)"
+                        @keydown.space.prevent="onSlotClick(board, slot.index, slot.pattern)"
+                        @pointerdown="onSlotPointerDown($event, board, slot.index, !!slot.pattern)"
+                        @contextmenu="onSlotContextMenu"
+                        @dragstart="onDragStart($event, board, slot.index, !!slot.pattern)"
+                        @dragend="onDragEnd"
                       >
-                        <span class="block max-w-full truncate text-[12px] font-medium">
-                          <McFormattedText :text="slot.pattern.primaryOutput?.displayName || patternTitle(slot.pattern)" />
+                        <ItemIcon
+                          v-if="slot.pattern"
+                          :item="slot.pattern.primaryOutput"
+                          flush
+                          class="pointer-events-none relative z-0 size-full drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]"
+                        />
+                        <span v-else class="sr-only">
+                          {{ dropTarget === slotKey(board.id, slot.index) ? t('patterns.dropHere') : t('patterns.emptySlot') }}
                         </span>
-                      </TooltipContent>
-                    </Tooltip>
+                      </div>
+                      <span
+                        v-if="selectMode && slot.pattern"
+                        class="pointer-events-none absolute -top-1 -right-1 z-[2] flex size-3.5 items-center justify-center rounded-[3px] border border-line text-[8px] leading-none"
+                        :class="isSelected(board.id, slot.index) ? 'bg-cyan text-[#041018]' : 'bg-[color-mix(in_srgb,var(--color-panel)_80%,transparent)] text-muted'"
+                      >
+                        {{ isSelected(board.id, slot.index) ? '✓' : '' }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -423,10 +670,27 @@ onUnmounted(() => {
       </ScrollFade>
     </div>
 
+    <!-- 触控拖拽幽灵层 -->
+    <Teleport to="body">
+      <div
+        v-if="ghost.active && ghostPattern"
+        class="pointer-events-none fixed z-[9999] -translate-x-1/2 -translate-y-1/2"
+        :style="{ left: `${ghost.x}px`, top: `${ghost.y}px` }"
+        aria-hidden="true"
+      >
+        <div class="pattern-drag-ghost-root relative" :class="slotSizeClass">
+          <div class="pattern-drag-ghost pattern-drag-ghost--live size-full">
+            <ItemIcon v-if="ghostPattern.primaryOutput" :item="ghostPattern.primaryOutput" flush class="pattern-drag-ghost__icon size-full" />
+          </div>
+          <span v-if="dragKeys.length > 1" class="pattern-drag-ghost__badge">{{ dragKeys.length }}</span>
+        </div>
+      </div>
+    </Teleport>
+
     <AppDialog :open="detailOpen" class="min-w-[18rem] max-w-[min(100%-1.5rem,28rem)] sm:max-w-[28rem]" @update:open="onDetailOpen">
       <template #header>
         <div class="flex items-center gap-2.5 pr-7">
-          <PatternItemSlot v-if="selected?.primaryOutput" :item="selected.primaryOutput" :size="34" amount="" variant="output" />
+          <PatternItemSlot v-if="selected?.primaryOutput" :item="selected.primaryOutput" :size="34" amount="" variant="output" :tip="false" />
           <div class="min-w-0">
             <span v-if="selected" :class="modeTagClass()">{{ modeLabel(selected.mode) }}</span>
             <h2 class="m-0 mt-0.5 text-[13px] font-semibold tracking-[-0.02em]">
@@ -441,11 +705,39 @@ onUnmounted(() => {
       <template v-if="selected">
         <div class="grid gap-1 text-[12px] text-muted">
           <p class="m-0">
+            {{ t('patterns.workMode') }}:
+            <span class="text-ink">{{ modeLabel(selected.mode) }}</span>
+          </p>
+          <p v-if="selected.craftingShape" class="m-0">
+            {{ t('patterns.craftingShape') }}:
+            <span class="text-ink">{{ craftingShapeLabel(selected.craftingShape) }}</span>
+          </p>
+          <p v-if="selected.encoder" class="m-0">
+            {{ t('patterns.encoder') }}:
+            <span class="text-ink">{{ selected.encoder }}</span>
+          </p>
+          <p v-if="selected.recipeId" class="mono m-0 text-[11px]">
+            {{ t('patterns.recipeId') }}:
+            <span class="text-ink">{{ selected.recipeId }}</span>
+          </p>
+          <p v-if="selected.slotIndex != null" class="m-0">
+            {{ t('patterns.slotIndex') }}:
+            <span class="mono text-ink">{{ selected.slotIndex }}</span>
+          </p>
+          <p class="m-0">
             {{ t('patterns.provider') }}:
             <McFormattedText class="text-ink" :text="selected.provider?.name || t('patterns.providerUnknown')" />
           </p>
+          <p v-if="selected.provider?.priority != null" class="m-0">
+            {{ t('patterns.priority') }}:
+            <span class="mono text-ink">{{ selected.provider.priority }}</span>
+          </p>
           <p v-if="providerPosText(selected.provider)" class="mono m-0 text-[11px]">
             {{ providerPosText(selected.provider) }}
+          </p>
+          <p v-if="providerTargetsText(selected.provider)" class="m-0">
+            {{ t('patterns.targets') }}:
+            <span class="text-ink">{{ providerTargetsText(selected.provider) }}</span>
           </p>
           <p class="m-0">
             {{ t('patterns.substitute') }}:
@@ -455,11 +747,6 @@ onUnmounted(() => {
             {{ t('patterns.substituteFluids') }}:
             <span class="text-ink">{{ selected.substituteFluids ? t('patterns.yes') : t('patterns.no') }}</span>
           </p>
-          <div v-if="selected.definition" class="flex items-center gap-2">
-            <span>{{ t('patterns.definition') }}:</span>
-            <PatternItemSlot :item="selected.definition" :size="18" amount="" />
-            <McFormattedText class="truncate" :text="selected.definition.displayName" />
-          </div>
         </div>
 
         <div class="mt-1 grid gap-2 border-t border-line pt-2.5">
@@ -478,3 +765,116 @@ onUnmounted(() => {
     <PatternMoveTargetDialog v-model:open="moveOpen" :providers="providers" :selected-count="selectedCount" :busy="moving" @confirm="onMoveConfirm" />
   </section>
 </template>
+
+<style scoped>
+/* 样板槽在滚动/折叠容器内：避免 translateY 顶边被裁切，改用描边高亮 */
+:deep(.pattern-chip:hover),
+:deep(.pattern-chip:active) {
+  transform: none;
+}
+
+:deep(.pattern-slot--drop-target) {
+  border-color: color-mix(in srgb, var(--color-cyan) 70%, var(--glass-border)) !important;
+  background: color-mix(in srgb, var(--color-cyan-dim) 22%, var(--color-slot));
+  transform: none !important;
+}
+
+:deep(.pattern-slot--pressing) {
+  transform: scale(0.94) !important;
+  opacity: 0.85;
+}
+</style>
+
+<style>
+/* 外层不裁切，角标可溢出；内层 clip 保证图与边框同圆角 */
+.pattern-drag-ghost-root {
+  position: relative;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* HTML5 setDragImage 挂到 body：屏外供截图 */
+body > .pattern-drag-ghost-root {
+  position: fixed;
+  top: -9999px;
+  left: -9999px;
+}
+
+.pattern-drag-ghost {
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 7px;
+  clip-path: inset(0 round 7px);
+  border: 1px solid color-mix(in srgb, var(--color-line-bright) 55%, var(--glass-border));
+  background: linear-gradient(155deg, color-mix(in srgb, var(--color-panel) 55%, transparent) 0%, color-mix(in srgb, var(--color-slot) 88%, #000000) 100%);
+  box-shadow:
+    inset 0 2px 4px color-mix(in srgb, #000000 45%, transparent),
+    0 8px 22px color-mix(in srgb, #000000 42%, transparent);
+  opacity: 0.96;
+  pointer-events: none;
+}
+
+.pattern-drag-ghost--live {
+  opacity: 0.95;
+  box-shadow:
+    inset 0 2px 4px color-mix(in srgb, #000000 45%, transparent),
+    0 8px 24px color-mix(in srgb, #000000 45%, transparent),
+    0 0 0 2px color-mix(in srgb, var(--color-cyan) 45%, transparent);
+}
+
+.pattern-drag-ghost__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: transparent !important;
+  border-radius: 0;
+}
+
+.pattern-drag-ghost__icon {
+  border-radius: 0 !important;
+}
+
+.pattern-drag-ghost__icon img,
+.pattern-drag-ghost__icon > span {
+  background: transparent !important;
+  border-radius: 0 !important;
+  filter: none;
+  box-shadow: none;
+}
+
+.pattern-drag-ghost__badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  z-index: 2;
+  display: flex;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--color-cyan, #3cf);
+  color: #041018;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 1px 4px color-mix(in srgb, #000000 40%, transparent);
+}
+
+/* 全局：指针拖期间抑制选择与浏览器默认手势 */
+body.pattern-pointer-dragging {
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none;
+  cursor: grabbing !important;
+}
+
+body.pattern-pointer-dragging * {
+  cursor: grabbing !important;
+}
+</style>

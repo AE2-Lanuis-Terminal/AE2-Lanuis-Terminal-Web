@@ -18,8 +18,6 @@ export interface CraftFlowNodeData {
   highlight: boolean
 }
 
-const ICON = 34
-
 const props = defineProps<NodeProps<CraftFlowNodeData>>()
 
 const slotClass = computed(() =>
@@ -50,7 +48,7 @@ const slotClass = computed(() =>
     <Handle type="target" :position="Position.Left" class="!pointer-events-none !h-1 !w-1 !border-0 !bg-transparent" />
 
     <div :class="slotClass">
-      <ItemIcon v-if="data.item" :item="data.item" :size="ICON" flush />
+      <ItemIcon v-if="data.item" :item="data.item" flush />
     </div>
 
     <Handle type="source" :position="Position.Right" class="!pointer-events-none !h-1 !w-1 !border-0 !bg-transparent" />

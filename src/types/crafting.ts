@@ -83,6 +83,17 @@ export interface CraftSubmitResponse {
   jobId?: string
 }
 
+/** 与游戏内合成 CPU GUI 同源的物品明细行 */
+export interface CraftJobStatusEntry {
+  item: Item
+  /** CPU 库存中已有 */
+  stored: string
+  /** 已发出、等待回库（制造中） */
+  active: string
+  /** 尚未推送的样板产出 */
+  pending: string
+}
+
 /** 单个合成 CPU 任务行 */
 export interface CraftJob {
   cpuName: string
@@ -103,6 +114,8 @@ export interface CraftJob {
   requested?: string
   /** 已耗时（纳秒） */
   elapsedNanos?: string
+  /** 忙碌时进度明细（物品行） */
+  entries?: CraftJobStatusEntry[]
 }
 
 /** GET /api/v1/crafting/jobs 响应 */

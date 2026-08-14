@@ -19,6 +19,7 @@ import {
   type ShellMode,
 } from '../lib/runtime'
 import type { ActingAsInfo } from '@/types'
+import { ApiError } from '@/utils/errors'
 
 export const useAuthStore = defineStore('auth', () => {
   const desktop = isTauri()
@@ -91,7 +92,9 @@ export const useAuthStore = defineStore('auth', () => {
       saveToken('')
       token.value = ''
       error.value = true
-      message.value = e instanceof Error ? e.message : String(e)
+      const raw = e instanceof Error ? e.message : String(e)
+      const isNet = (e instanceof ApiError && e.code === 'network_error') || /network error/i.test(raw)
+      message.value = isNet ? tt('auth.networkError') : raw
     } finally {
       busy.value = false
     }
