@@ -2,7 +2,7 @@
 
 本仓库遵循 [Keep a Changelog](https://keepachangelog.com/)，版本号遵循 [SemVer](https://semver.org/)。
 
-**本仓 tag `vX.Y.Z` 为三仓版本源**。主仓 jar 与 Client 安装包均消费该 tag。详见 [docs/RELEASE.md](docs/RELEASE.md) 与主仓 [docs/RELEASE.md](https://github.com/Lexcubia/AE2-Lanuis-Terminal/blob/main/docs/RELEASE.md)。
+**本仓 tag `vX.Y.Z` 为三仓版本源**。主仓 jar 与 Client 安装包均消费该 tag。详见 [docs/RELEASE.md](docs/RELEASE.md) 与主仓 [docs/RELEASE.md](https://github.com/AE2-Lanuis-Terminal/AE2-Lanuis-Terminal/blob/main/docs/RELEASE.md)。
 
 ## [Unreleased]
 
