@@ -2,7 +2,7 @@
 
 本仓是 **版本源**：发行后打 GitHub tag `vX.Y.Z`，主仓 submodule 与 Client CI 均检出该 tag。
 
-总流程见主仓 [`docs/RELEASE.md`](https://github.com/Lexcubia/AE2-Lanuis-Terminal/blob/main/docs/RELEASE.md)。
+总流程见主仓 [`docs/RELEASE.md`](https://github.com/AE2-Lanuis-Terminal/AE2-Lanuis-Terminal/blob/main/docs/RELEASE.md)。
 
 ## 发行 PR 清单
 
