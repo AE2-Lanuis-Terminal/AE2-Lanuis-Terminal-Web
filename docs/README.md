@@ -2,7 +2,7 @@
 
 ## 使用者
 
-日常使用请看根目录 [README.md](../README.md)，以及主模组 [安装说明](https://github.com/AE2-Lanuis-Terminal/AE2-Lanuis-Terminal/blob/main/docs/INSTALL.md)。
+日常使用请看根目录 [README.md](../README.md)，以及主模组 [安装说明](https://github.com/Lexcubia/AE2-Lanuis-Terminal/blob/main/docs/INSTALL.md)。
 
 ## 开发者
 
